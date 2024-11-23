@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 
 // Mock function to simulate checking if an admin exists
 const adminExists = () => {
@@ -30,7 +30,7 @@ export default function Authorization() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100">
       <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-8">
-        <h1 className="text-2xl font-bold mb-6 text-center">
+        <h1 className="text-2xl font-bold mb-6 text-center text-black">
           {isLogin ? 'Login' : 'Sign Up'}
         </h1>
         <form onSubmit={handleSubmit}>
@@ -45,7 +45,7 @@ export default function Authorization() {
               value={formData.email}
               onChange={handleInputChange}
               required
-              className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black"
             />
           </div>
           <div className="mb-4">
@@ -59,7 +59,7 @@ export default function Authorization() {
               value={formData.password}
               onChange={handleInputChange}
               required
-              className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black"
             />
           </div>
           <div className="mb-4">
@@ -71,7 +71,7 @@ export default function Authorization() {
               value={role}
               onChange={handleRoleChange}
               disabled={!isLogin && role === 'admin' && adminExists()}
-              className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black"
             >
               <option value="manager">Manager</option>
               <option value="admin" disabled={adminExists()}>
