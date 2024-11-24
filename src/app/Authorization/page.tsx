@@ -1,5 +1,6 @@
 'use client'
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 // Mock function to simulate checking if an admin exists
 const adminExists = () => {
@@ -11,6 +12,7 @@ export default function Authorization() {
   const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState('manager');
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -30,6 +32,12 @@ export default function Authorization() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100">
       <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-8">
+      <button
+          onClick={() => router.back()}// Go back to the previous page
+          className="text-blue-500 mb-4 hover:underline focus:outline-none"
+        >
+          ← Back
+        </button>
         <h1 className="text-2xl font-bold mb-6 text-center text-black">
           {isLogin ? 'Login' : 'Sign Up'}
         </h1>
