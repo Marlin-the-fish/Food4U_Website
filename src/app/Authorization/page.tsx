@@ -1,9 +1,10 @@
 'use client'
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
+import Link from 'next/link'
 
 const instance = axios.create({
-  baseURL: 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial' // Replace with your backend base URL
+  baseURL: 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial' // Replace with your backend base URL 
 });
 
 export default function Authorization() {
@@ -180,6 +181,15 @@ export default function Authorization() {
         {statusMessage && (
           <div className="mt-4 text-center">
             <p className="text-red-500 text-sm">{statusMessage}</p>
+          </div>
+        )}
+
+        {/* Link to Admin Page on Successful Login */}
+        {statusMessage === 'Login successful. Correct Admin Credentials.' && (
+          <div className="mt-4 text-center">
+            <Link href={`/Admin?username=${formData.username}&password=${formData.password}`}>
+              <a className="text-blue-500 hover:underline">Go to Admin Page</a>
+            </Link>
           </div>
         )}
 
