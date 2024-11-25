@@ -41,12 +41,12 @@ export default function AdminPage() {
   const handleDeleteRestaurant = async () => {
     try {
       if (selectedRestaurant) {
-        const response = await instance.post('/deleteRestaurant', {
+        const response = await instance.post('/deleteRestaurantAdmin', {
           username: sessionStorage.getItem('username').toString(),
           password: sessionStorage.getItem('password').toString(),
-          restaurant: selectedRestaurant
+          restaurantID: selectedRestaurant
         });
-        if (response.data.success) {
+        if (response.data.isDeleted) {
           setStatusMessage('Restaurant deleted successfully.');
           fetchRestaurants(); // Refresh the list
           setSelectedRestaurant(''); // Hide buttons

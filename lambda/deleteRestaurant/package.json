@@ -1,0 +1,13 @@
+{
+  "name": "deleteRestaurant",
+  "version": "1.0.0",
+  "description": "Delete a selected Restaurant",
+  "main": "index.mjs",
+  "repository": "TBA",
+  "author": "SAM CLI",
+  "license": "MIT",
+  "type" : "commonjs",
+  "dependencies": {
+    "mysql": "^2.18.1"
+  }
+}
