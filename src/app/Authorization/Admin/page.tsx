@@ -40,7 +40,6 @@ export default function AdminPage() {
   // Handle Delete Restaurant
   const handleDeleteRestaurant = async () => {
     try {
-      if (selectedRestaurant) {
         const response = await instance.post('/deleteRestaurantAdmin', {
           username: sessionStorage.getItem('username').toString(),
           password: sessionStorage.getItem('password').toString(),
@@ -53,8 +52,7 @@ export default function AdminPage() {
         } else {
           setStatusMessage('Failed to delete restaurant.');
         }
-      }
-    } catch (error) {
+      }  catch (error) {
       setStatusMessage('An error occurred. Please try again later.');
     }
   };
