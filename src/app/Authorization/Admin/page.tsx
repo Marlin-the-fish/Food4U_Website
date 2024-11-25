@@ -49,6 +49,7 @@ export default function AdminPage() {
         if (response.data.success) {
           setStatusMessage('Restaurant deleted successfully.');
           fetchRestaurants(); // Refresh the list
+          setSelectedRestaurant(''); // Hide buttons
         } else {
           setStatusMessage('Failed to delete restaurant.');
         }
@@ -99,6 +100,13 @@ export default function AdminPage() {
     }
   };
 
+  // Handle Refresh Restaurants
+  const handleRefreshRestaurants = async () => {
+    setSelectedRestaurant(''); // Hide buttons
+    setStatusMessage(''); // Clear status message
+    fetchRestaurants(); // Fetch restaurants again
+  };
+
   // Use effect to handle authorization and fetching data
   useEffect(() => {
     // Get the username and password from session storage
@@ -134,6 +142,14 @@ export default function AdminPage() {
               </option>
             ))}
           </select>
+        </div>
+        <div className="flex flex-col mt-6">
+          <button
+            onClick={handleRefreshRestaurants}
+            className="bg-yellow-500 text-white py-2 px-4 rounded-md hover:bg-yellow-600 transition duration-200"
+          >
+            Refresh Restaurants
+          </button>
         </div>
         {selectedRestaurant && (
           <div className="flex flex-col mt-6 space-y-4">
