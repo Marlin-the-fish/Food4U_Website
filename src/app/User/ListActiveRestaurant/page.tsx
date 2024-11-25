@@ -1,18 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import '../globals.css'; // Ensure this path correctly imports your global CSS
+import '../globals.css';
 
 export default function ChooseRestaurant() {
   const [restaurants, setRestaurants] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredRestaurants, setFilteredRestaurants] = useState<string[]>([]);
 
-  // Fetch restaurants from the database/API
+  // Fetch restaurants from AWS Lambda API
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const response = await fetch('/api/restaurants'); // Replace with your API endpoint
+        const response = await fetch('https://<your-api-gateway-url>/dev/restaurants'); // Replace with your API Gateway URL
         if (!response.ok) {
           throw new Error('Failed to fetch restaurants');
         }
@@ -88,4 +88,4 @@ export default function ChooseRestaurant() {
       </div>
     </main>
   );
- }
+}
