@@ -31,66 +31,84 @@ export default function Authorization() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatusMessage(''); // Reset status message on submit
-
+  
     try {
       if (isLogin) {
-        if (role === 'admin') {
-          // For admin login
-          const response = await instance.post('/loginAdmin', {
-            username: formData.username,
-            password: formData.password
-          });
-          if (response.data.success === "Correct Admin Credentials") {
-            setStatusMessage('Login successful. Correct Admin Credentials.');
-            // Redirect to the admin page with username and password in query params
-            // Store credentials in session storage
-            sessionStorage.setItem('username', formData.username);
-            sessionStorage.setItem('password', formData.password);
-            // Redirect to the admin page
-            router.push('/Authorization/Admin');
-          } else {
-            setStatusMessage('Invalid admin credentials. Please try again.');
-          }
-        } else if (role === 'manager') {
-          // For manager login
-          const response = await instance.post('/loginManager', {
-            username: formData.username,
-            password: formData.password
-          });
-          if (response.data.success === "Correct Manager Credentials") {
-            setStatusMessage('Login successful. Correct Manager Credentials.');
-          } else {
-            setStatusMessage('Invalid manager credentials. Please try again.');
-          }
-        }
+        // Login logic
+        await handleLogin();
       } else {
-        // For sign up
-        const response = await instance.post('/loginAdmin', {
-          username: formData.username,
-          password: formData.password
-        });
-
-        if (response.data.success === "New Admin Created") {
-          setStatusMessage('Sign-up successful. New admin created.');
-        } else if (response.data.success === "Correct Admin Credentials") {
-          // If admin already exists, change role to manager and attempt to sign up again
-          setRole('manager');
-          const managerResponse = await instance.post('/loginManager', {
-            username: formData.username,
-            password: formData.password
-          });
-          
-          if (managerResponse.data.success === "New Manager Created") {
-            setStatusMessage('Admin already exists. Sign-up successful as manager.');
-          } else {
-            setStatusMessage('Sign-up failed. Manager role creation failed.');
-          }
-        } else {
-          setStatusMessage('Sign-up failed. Admin already exists.');
-        }
+        // Sign-up logic
+        await handleSignUp();
       }
     } catch (error) {
+      console.error('Error during form submission:', error);
       setStatusMessage('An error occurred. Please try again later.');
+    }
+  };
+  
+  // Separate function for login
+  const handleLogin = async () => {
+    const endpoint = role === 'admin' ? '/loginAdmin' : '/loginManager';
+  
+    try {
+      const response = await instance.post(endpoint, formData);
+  
+      if (response.data.success) {
+        if (response.data.success.includes('Correct')) {
+          setStatusMessage('Login successful.');
+          sessionStorage.setItem('username', formData.username);
+          sessionStorage.setItem('password', formData.password);
+  
+          // Redirect based on role
+          const redirectPath = role === 'admin' ? '/Authorization/Admin' : '/Manager';
+          router.push(redirectPath);
+        } else {
+          setStatusMessage('Invalid credentials. Please try again.');
+        }
+      } else {
+        setStatusMessage('Invalid credentials. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      setStatusMessage('An error occurred during login. Please try again later.');
+    }
+  };
+  
+  // Separate function for sign-up
+  const handleSignUp = async () => {
+    if (role === 'admin') {
+      // Admin sign-up
+      try {
+        const response = await instance.post('/loginAdmin', formData);
+  
+        if (response.data.success === 'New Admin Created') {
+          setStatusMessage('Sign-up successful. New admin created.');
+        } else if (response.data.success === 'Correct Admin Credentials') {
+          setStatusMessage('Sign-up failed. Admin already exists.');
+        } else {
+          setStatusMessage('Sign-up failed. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error during admin sign-up:', error);
+        setStatusMessage('An error occurred during admin sign-up. Please try again later.');
+      }
+    } else if (role === 'manager') {
+      // Manager sign-up
+      try {
+        const response = await instance.post('/loginManager', formData);
+  
+        if (response.data.success === 'New Manager Created') {
+          setStatusMessage('Sign-up successful. New manager created.');
+          sessionStorage.setItem('username', formData.username);
+          sessionStorage.setItem('password', formData.password);
+          router.push('/Manager');
+        } else {
+          setStatusMessage('Sign-up failed. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error during manager sign-up:', error);
+        setStatusMessage('An error occurred during manager sign-up. Please try again later.');
+      }
     }
   };
   
