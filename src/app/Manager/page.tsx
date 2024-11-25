@@ -1,6 +1,11 @@
 'use client'; // For Next.js
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation'; // Next.js router
+import axios from 'axios';
+
+const instance = axios.create({
+  baseURL: 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial' 
+});
 
 export default function RestaurantOwnerHub() {
   const router = useRouter();
