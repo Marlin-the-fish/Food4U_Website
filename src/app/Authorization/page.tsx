@@ -1,10 +1,10 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 const instance = axios.create({
-  baseURL: 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial' // Replace with your backend base URL 
+  baseURL: 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial' 
 });
 
 export default function Authorization() {
@@ -13,6 +13,7 @@ export default function Authorization() {
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [adminAlreadyExists, setAdminAlreadyExists] = useState(false);
   const [statusMessage, setStatusMessage] = useState(''); // Status message state
+  const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -39,8 +40,14 @@ export default function Authorization() {
             username: formData.username,
             password: formData.password
           });
-          if (response.data.success == "Correct Admin Credentials") {
+          if (response.data.success === "Correct Admin Credentials") {
             setStatusMessage('Login successful. Correct Admin Credentials.');
+            // Redirect to the admin page with username and password in query params
+            // Store credentials in session storage
+            sessionStorage.setItem('username', formData.username);
+            sessionStorage.setItem('password', formData.password);
+            // Redirect to the admin page
+            router.push('/Authorization/Admin');
           } else {
             setStatusMessage('Invalid admin credentials. Please try again.');
           }
@@ -50,7 +57,7 @@ export default function Authorization() {
             username: formData.username,
             password: formData.password
           });
-          if (response.data.success == "Correct Manager Credentials") {
+          if (response.data.success === "Correct Manager Credentials") {
             setStatusMessage('Login successful. Correct Manager Credentials.');
           } else {
             setStatusMessage('Invalid manager credentials. Please try again.');
@@ -63,9 +70,9 @@ export default function Authorization() {
           password: formData.password
         });
 
-        if (response.data.success == "New Admin Created") {
+        if (response.data.success === "New Admin Created") {
           setStatusMessage('Sign-up successful. New admin created.');
-        } else if (response.data.success == "Correct Admin Credentials") {
+        } else if (response.data.success === "Correct Admin Credentials") {
           // If admin already exists, change role to manager and attempt to sign up again
           setRole('manager');
           const managerResponse = await instance.post('/loginManager', {
@@ -73,7 +80,7 @@ export default function Authorization() {
             password: formData.password
           });
           
-          if (managerResponse.data.success == "New Manager Created") {
+          if (managerResponse.data.success === "New Manager Created") {
             setStatusMessage('Admin already exists. Sign-up successful as manager.');
           } else {
             setStatusMessage('Sign-up failed. Manager role creation failed.');
@@ -97,7 +104,7 @@ export default function Authorization() {
       });
   
       // Check response data to determine if admin exists
-      if (response.data.success == "Correct Admin Credentials" || response.data.success == "New Admin Created") {
+      if (response.data.success === "Correct Admin Credentials" || response.data.success === "New Admin Created") {
         return true; // Admin exists
       } else {
         return false; // Admin does not exist
@@ -115,6 +122,9 @@ export default function Authorization() {
   };
 
   useEffect(() => {
+    // Clear credentials in session storage
+    sessionStorage.setItem('username', '');
+    sessionStorage.setItem('password', '');
     if (!isLogin && role === 'admin') {
       checkAdminExistence();
     }
@@ -181,15 +191,6 @@ export default function Authorization() {
         {statusMessage && (
           <div className="mt-4 text-center">
             <p className="text-red-500 text-sm">{statusMessage}</p>
-          </div>
-        )}
-
-        {/* Link to Admin Page on Successful Login */}
-        {statusMessage === 'Login successful. Correct Admin Credentials.' && (
-          <div className="mt-4 text-center">
-            <Link href={`/Admin?username=${formData.username}&password=${formData.password}`}>
-              <a className="text-blue-500 hover:underline">Go to Admin Page</a>
-            </Link>
           </div>
         )}
 

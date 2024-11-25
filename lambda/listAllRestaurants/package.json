@@ -1,12 +1,12 @@
 {
-  "name": "login",
+  "name": "list",
   "version": "1.0.0",
-  "description": "Handle Login for Admin",
+  "description": "List Constants",
   "main": "index.mjs",
   "repository": "TBA",
   "author": "SAM CLI",
   "license": "MIT",
-  "type": "commonjs",
+  "type" : "commonjs",
   "dependencies": {
     "mysql": "^2.18.1"
   }

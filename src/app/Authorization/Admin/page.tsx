@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const instance = axios.create({
   baseURL: 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial'
@@ -12,17 +12,26 @@ export default function AdminPage() {
   const [restaurants, setRestaurants] = useState([]);
   const [selectedRestaurant, setSelectedRestaurant] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
+  const router = useRouter();
 
   // Handle input change for selected restaurant
-  const handleRestaurantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleRestaurantChange = (e) => {
     setSelectedRestaurant(e.target.value);
   };
 
-  // Fetch restaurants list from backend
+  // Fetch Restaurants function
   const fetchRestaurants = async () => {
     try {
-      const response = await instance.post('/listAllRestaurants');
-      setRestaurants(response.data.restaurants);
+      const response = await instance.post('/listAllRestaurants', {
+        username: formData.username,
+        password: formData.password
+      });
+      if (response.status == 200 && response.data.success == "Correct Admin Credentials") {
+        // Update to match the structure of the returned data
+        setRestaurants(response.data.restaurants);
+      } else {
+        setRestaurants([]); // Clear if no data is found or credentials are incorrect
+      }
     } catch (error) {
       console.error('Error fetching restaurants:', error);
     }
@@ -71,21 +80,20 @@ export default function AdminPage() {
 
   // Use effect to handle authorization and fetching data
   useEffect(() => {
-    // Get the username and password from href
-    const urlParams = new URLSearchParams(window.location.search);
-    const username = urlParams.get('username');
-    const password = urlParams.get('password');
+    // Get the username and password from session storage
+    const username = sessionStorage.getItem('username');
+    const password = sessionStorage.getItem('password');
 
     if (!username || !password) {
       // If no credentials, redirect to Authorization page
-      window.location.href = '/Authorization';
+      router.push('/Authorization');
     } else {
       // Set credentials in state
       setFormData({ username, password });
       // Fetch list of restaurants
       fetchRestaurants();
     }
-  }, []);
+  }, [router]);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100">
@@ -99,11 +107,12 @@ export default function AdminPage() {
             id="restaurants"
             value={selectedRestaurant}
             onChange={handleRestaurantChange}
-            className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          >
+            className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="" disabled>Select a restaurant...</option>
-            {restaurants.map((restaurant, index) => (
-              <option key={index} value={restaurant}>{restaurant}</option>
+            {restaurants.length > 0 && restaurants.map((restaurant) => (
+              <option key={restaurant.idRestaurant} value={restaurant.idRestaurant}>
+                {restaurant.name} - Status: {restaurant.activeStatus === 'ACTIVE' ? 'Active' : 'Inactive'}
+              </option>
             ))}
           </select>
         </div>
@@ -132,11 +141,12 @@ export default function AdminPage() {
         )}
 
         <div className="mt-4 text-center">
-          <Link href="/Authorization">
-            <button className="text-blue-500 hover:underline">
-              Back to Admin Login
-            </button>
-          </Link>
+          <button
+            onClick={() => router.push('/Authorization')}
+            className="text-blue-500 hover:underline"
+          >
+            Back to Admin Login
+          </button>
         </div>
       </div>
     </main>
