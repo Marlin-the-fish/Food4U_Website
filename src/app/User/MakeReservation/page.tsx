@@ -1,10 +1,12 @@
 'use client'
 import React, { useState } from 'react'
-import Link from 'next/link'
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function MakeReservation() {
   const [formData, setFormData] = useState({ name: '', email: '' });
   const [error, setError] = useState('');
+  const router = useRouter(); // Next.js router for navigation
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -19,7 +21,7 @@ export default function MakeReservation() {
     }
     setError('');
     console.log('Reservation details:', formData);
-    // Navigate to the next step in the reservation process
+    router.push('/ListActiveRestaurant'); // Redirect to ListActiveRestaurant page
   };
 
   return (
@@ -66,12 +68,17 @@ export default function MakeReservation() {
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
           {/* Continue Button */}
-          <button
-            type="submit"
-            className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-200"
+          <Link
+            href="/User/ListActiveRestaurant"
+            className="w-full block"
           >
-            Continue
-          </button>
+            <button
+              type="submit"
+              className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-200"
+            >
+              Continue
+            </button>
+          </Link>
         </form>
 
         {/* Back Link */}

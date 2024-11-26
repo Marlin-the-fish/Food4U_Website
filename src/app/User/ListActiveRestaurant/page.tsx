@@ -1,90 +1,161 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import '../../globals.css';
+import axios from 'axios';
 
-export default function ChooseRestaurant() {
-  const [restaurants, setRestaurants] = useState<string[]>([]);
+const instance = axios.create({
+  baseURL: 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial',
+});
+
+export default function ListActiveRestaurant() {
+  const [restaurants, setRestaurants] = useState([]);
+  const [filteredRestaurants, setFilteredRestaurants] = useState([]);
+  const [selectedRestaurant, setSelectedRestaurant] = useState('');
+  const [selectedRestaurantName, setSelectedRestaurantName] = useState('');
+  const [statusMessage, setStatusMessage] = useState('');
+  const [filterDate, setFilterDate] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredRestaurants, setFilteredRestaurants] = useState<string[]>([]);
 
-  // Fetch restaurants from AWS Lambda API
-  useEffect(() => {
-    const fetchRestaurants = async () => {
-      try {
-        const response = await fetch('https://<your-api-gateway-url>/dev/restaurants'); // Replace with your API Gateway URL
-        if (!response.ok) {
-          throw new Error('Failed to fetch restaurants');
-        }
-        const data = await response.json();
-        setRestaurants(data);
-        setFilteredRestaurants(data);
-      } catch (error) {
-        console.error('Error fetching restaurants:', error);
+  // Fetch Active Restaurants
+  const fetchActiveRestaurants = async () => {
+    try {
+      const response = await instance.post('/listActiveRestaurant');
+      if (response.status === 200 && response.data.restaurants) {
+        setRestaurants(response.data.restaurants);
+        setFilteredRestaurants(response.data.restaurants); // Initialize filtered list
+      } else {
+        setStatusMessage('Failed to fetch active restaurants.');
       }
-    };
+    } catch (error) {
+      console.error('Error fetching active restaurants:', error);
+      setStatusMessage('An error occurred. Please try again.');
+    }
+  };
 
-    fetchRestaurants();
-  }, []);
+  // Handle Restaurant Selection
+  const handleRestaurantChange = (e) => {
+    const selectedId = e.target.value;
+    setSelectedRestaurant(selectedId);
+    const selected = restaurants.find((restaurant) => restaurant.idRestaurant === selectedId);
+    setSelectedRestaurantName(selected ? selected.name : '');
+  };
 
-  // Filter restaurants based on the search query
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle Date Filter
+  const handleDateFilter = (e) => {
+    const selectedDate = new Date(e.target.value);
+    setFilterDate(e.target.value);
+    filterRestaurants(searchQuery, e.target.value);
+  };
+
+  // Handle Name Search
+  const handleSearchQueryChange = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
-    setFilteredRestaurants(
-      restaurants.filter((restaurant) =>
-        restaurant.toLowerCase().includes(query)
-      )
-    );
+    filterRestaurants(query, filterDate);
   };
 
-  const handleSelect = (restaurant: string) => {
-    console.log(`Selected: ${restaurant}`);
-    // Perform navigation or other actions based on selection
+  // Filter Restaurants
+  const filterRestaurants = (query, date) => {
+    const selectedDate = date ? new Date(date) : null;
+    const filtered = restaurants.filter((restaurant) => {
+      const matchesName = restaurant.name.toLowerCase().includes(query);
+      const matchesDate = selectedDate
+        ? new Date(restaurant.openDate) <= selectedDate && new Date(restaurant.closeDate) >= selectedDate
+        : true;
+      return matchesName && matchesDate;
+    });
+    setFilteredRestaurants(filtered);
   };
+
+  // Handle Refresh Restaurants
+  const handleRefreshRestaurants = () => {
+    setSelectedRestaurant('');
+    setSelectedRestaurantName('');
+    setStatusMessage('');
+    setFilterDate('');
+    setSearchQuery('');
+    fetchActiveRestaurants();
+  };
+
+  // Initial Data Fetch
+  useEffect(() => {
+    fetchActiveRestaurants();
+  }, []);
 
   return (
-    <main className="min-h-screen bg-gray-100 p-6">
-      <header className="text-center mb-8">
-        <h1 className="text-5xl font-bold text-purple-600">TABLE4U</h1>
-        <p className="text-xl text-black mt-2">
-          Find and book the best restaurant in town
-        </p>
-        <div className="flex justify-end mt-4">
-          <button className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">
-            Admin Login
-          </button>
-        </div>
-      </header>
-      <div className="max-w-4xl mx-auto">
-        <div className="flex gap-4 mb-6">
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100">
+      <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-8">
+        <h1 className="text-2xl font-bold mb-6 text-center text-black">Active Restaurants</h1>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-black mb-1" htmlFor="searchQuery">
+            Search by Name
+          </label>
           <input
             type="text"
-            placeholder="Search restaurants..."
+            id="searchQuery"
             value={searchQuery}
-            onChange={handleSearch}
-            className="flex-grow px-4 py-2 border rounded focus:ring-2 focus:ring-purple-500"
+            onChange={handleSearchQueryChange}
+            placeholder="Enter restaurant name"
+            className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black"
           />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-black mb-1" htmlFor="filterDate">
+            Filter by Date
+          </label>
           <input
             type="date"
-            className="px-4 py-2 border rounded focus:ring-2 focus:ring-purple-500"
-          />
-          <input
-            type="time"
-            className="px-4 py-2 border rounded focus:ring-2 focus:ring-purple-500"
+            id="filterDate"
+            value={filterDate}
+            onChange={handleDateFilter}
+            className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black"
           />
         </div>
-        <div className="space-y-4">
-          {filteredRestaurants.map((restaurant, index) => (
-            <button
-              key={index}
-              onClick={() => handleSelect(restaurant)}
-              className="w-full px-4 py-2 bg-white border rounded shadow hover:bg-gray-100"
-            >
-              {restaurant}
-            </button>
-          ))}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-black mb-1" htmlFor="restaurants">
+            Select a Restaurant
+          </label>
+          <select
+            id="restaurants"
+            value={selectedRestaurant}
+            onChange={handleRestaurantChange}
+            className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black"
+          >
+            <option value="" disabled>
+              Select a restaurant...
+            </option>
+            {filteredRestaurants.length > 0 &&
+              filteredRestaurants.map((restaurant) => (
+                <option key={restaurant.idRestaurant} value={restaurant.idRestaurant}>
+                  {restaurant.name} - {restaurant.address}
+                </option>
+              ))}
+          </select>
         </div>
+
+        <div className="flex flex-col mt-6">
+          <button
+            onClick={handleRefreshRestaurants}
+            className="bg-yellow-500 text-black py-2 px-4 rounded-md hover:bg-yellow-600 transition duration-200"
+          >
+            Refresh Restaurants
+          </button>
+        </div>
+
+        {selectedRestaurant && (
+          <div className="mt-6 text-center">
+            <p className="text-sm text-black">
+              Selected Restaurant: <strong>{selectedRestaurantName}</strong>
+            </p>
+          </div>
+        )}
+
+        {/* Display Status Message */}
+        {statusMessage && (
+          <div className="mt-4 text-center">
+            <p className="text-black text-sm">{statusMessage}</p>
+          </div>
+        )}
       </div>
     </main>
   );
