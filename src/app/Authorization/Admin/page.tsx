@@ -118,7 +118,7 @@ export default function AdminPage() {
       // Fetch list of restaurants
       fetchRestaurants();
     }
-  }, [router]);
+  }, [router, fetchRestaurants]);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100">

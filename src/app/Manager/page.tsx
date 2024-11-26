@@ -27,7 +27,7 @@ export default function RestaurantOwnerHub() {
     };
 
     checkRestaurant();
-  }, []);
+  }, [router]);
 
   return (
     <main className="min-h-screen bg-purple-200 flex flex-col items-center justify-center p-6">
