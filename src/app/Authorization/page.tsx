@@ -4,7 +4,7 @@ import axios from 'axios'
 import { useRouter } from 'next/navigation'
 
 const instance = axios.create({
-  baseURL: 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial' 
+  baseURL: 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial',
 });
 
 export default function Authorization() {
@@ -33,7 +33,7 @@ export default function Authorization() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatusMessage(''); // Reset status message on submit
-  
+
     try {
       if (isLogin) {
         // Login logic
@@ -47,20 +47,20 @@ export default function Authorization() {
       setStatusMessage('An error occurred. Please try again later.');
     }
   };
-  
+
   // Separate function for login
   const handleLogin = async () => {
-    const endpoint = role === 'admin' ? '/loginAdmin' : '/loginManager';
-  
+    const endpoint = role === 'admin' ? '/loginAdmin' : '/loginRestaurantManager';
+
     try {
       const response = await instance.post(endpoint, formData);
-  
+
       if (response.data.success) {
         if (response.data.success.includes('Correct')) {
           setStatusMessage('Login successful.');
           sessionStorage.setItem('username', formData.username);
           sessionStorage.setItem('password', formData.password);
-  
+
           // Redirect based on role
           const redirectPath = role === 'admin' ? '/Authorization/Admin' : '/Manager';
           router.push(redirectPath);
@@ -75,14 +75,42 @@ export default function Authorization() {
       setStatusMessage('An error occurred during login. Please try again later.');
     }
   };
-  
+
   // Separate function for sign-up
   const handleSignUp = async () => {
-    if (role === 'admin') {
-      // Admin sign-up
+    console.log("Hello")
+    if (role === 'manager') {
+      try {
+        console.log('Attempting to sign up manager with data:', formData);
+
+        const response = await instance.post('/loginRestaurantManager', {
+          email: formData.username,
+          password: formData.password,
+        });
+
+        console.log('Response from backend:', response);
+
+        if (response.status === 201) {
+          setStatusMessage('Sign-up successful. New manager created.');
+        } else {
+          setStatusMessage(response.data.message || 'Sign-up failed. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error during manager sign-up:', error);
+
+        if (error.response) {
+          setStatusMessage(error.response.data.message || 'Sign-up failed. Please try again.');
+        } else if (error.request) {
+          setStatusMessage('Network error. Please check your connection.');
+        } else {
+          setStatusMessage('An unexpected error occurred. Please try again later.');
+        }
+      }
+    } else if (role === 'admin') {
+      // Admin sign-up logic
       try {
         const response = await instance.post('/loginAdmin', formData);
-  
+
         if (response.data.success === 'New Admin Created') {
           setStatusMessage('Sign-up successful. New admin created.');
           sessionStorage.setItem('username', formData.username);
@@ -96,37 +124,20 @@ export default function Authorization() {
         console.error('Error during admin sign-up:', error);
         setStatusMessage('An error occurred during admin sign-up. Please try again later.');
       }
-    } else if (role === 'manager') {
-      // Manager sign-up
-      try {
-        const response = await instance.post('/loginManager', formData);
-  
-        if (response.data.success === 'New Manager Created') {
-          setStatusMessage('Sign-up successful. New manager created.');
-          sessionStorage.setItem('username', formData.username);
-          sessionStorage.setItem('password', formData.password);
-          router.push('/Manager');
-        } else {
-          setStatusMessage('Sign-up failed. Please try again.');
-        }
-      } catch (error) {
-        console.error('Error during manager sign-up:', error);
-        setStatusMessage('An error occurred during manager sign-up. Please try again later.');
-      }
     }
   };
-  
+
   // Function to simulate checking if an admin exists
   const adminExists = async () => {
     try {
       // Await the response from the POST request to the backend
       const response = await instance.post('/loginAdmin', {
         username: formData.username,
-        password: formData.password
+        password: formData.password,
       });
-  
+
       // Check response data to determine if admin exists
-      if (response.data.success === "Correct Admin Credentials" || response.data.success === "New Admin Created") {
+      if (response.data.success === 'Correct Admin Credentials' || response.data.success === 'New Admin Created') {
         return true; // Admin exists
       } else {
         return false; // Admin does not exist
@@ -162,8 +173,8 @@ export default function Authorization() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100">
       <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-8">
-      <button
-          onClick={() => router.back()}// Go back to the previous page
+        <button
+          onClick={() => router.back()} // Go back to the previous page
           className="text-blue-500 mb-4 hover:underline focus:outline-none"
         >
           ← Back
