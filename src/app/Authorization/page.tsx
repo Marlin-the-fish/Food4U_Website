@@ -1,7 +1,7 @@
-'use client'
-import React, { useState, useEffect, useRef } from 'react'
-import axios from 'axios'
-import { useRouter } from 'next/navigation'
+'use client';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 const instance = axios.create({
   baseURL: 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial',
@@ -14,8 +14,6 @@ export default function Authorization() {
   const [adminAlreadyExists, setAdminAlreadyExists] = useState(false);
   const [statusMessage, setStatusMessage] = useState(''); // Status message state
   const router = useRouter();
-  // Use a ref to track if it's the first render
-  const isFirstRender = useRef(true);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -62,7 +60,7 @@ export default function Authorization() {
           sessionStorage.setItem('password', formData.password);
 
           // Redirect based on role
-          const redirectPath = role === 'admin' ? '/Authorization/Admin' : '/Manager';
+          const redirectPath = role === 'admin' ? '/Authorization/Admin' : '/Authorization/Manager';
           router.push(redirectPath);
         } else {
           setStatusMessage('Invalid credentials. Please try again.');
@@ -90,7 +88,7 @@ export default function Authorization() {
 
         console.log('Response from backend:', response);
 
-        if (response.status === 201) {
+        if (response.status === 200) {
           setStatusMessage('Sign-up successful. New manager created.');
         } else {
           setStatusMessage(response.data.message || 'Sign-up failed. Please try again.');
@@ -113,8 +111,6 @@ export default function Authorization() {
 
         if (response.data.success === 'New Admin Created') {
           setStatusMessage('Sign-up successful. New admin created.');
-          sessionStorage.setItem('username', formData.username);
-          sessionStorage.setItem('password', formData.password);
         } else if (response.data.success === 'Correct Admin Credentials') {
           setStatusMessage('Sign-up failed. Admin already exists.');
         } else {
@@ -155,20 +151,13 @@ export default function Authorization() {
   };
 
   useEffect(() => {
-
-    if (isFirstRender.current) {
-      // Clear sessionStorage on first render
-      sessionStorage.setItem('username', '');
-      sessionStorage.setItem('password', '');
-      console.log('Cleared sessionStorage on first render');
-
-      // Mark as no longer the first render
-      isFirstRender.current = false;
-    }
+    // Clear credentials in session storage
+    sessionStorage.setItem('username', '');
+    sessionStorage.setItem('password', '');
     if (!isLogin && role === 'admin') {
       checkAdminExistence();
     }
-  }, [isLogin, role, checkAdminExistence]);
+  }, [isLogin, role]);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100">
