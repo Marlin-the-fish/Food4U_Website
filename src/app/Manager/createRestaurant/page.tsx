@@ -33,7 +33,7 @@ export default function CreateRestaurant() {
 
       if (response.status === 200) {
         const { message: successMessage, restaurantId } = responseData;
-        setMessage(`${successMessage} ID: ${restaurantId}`);
+        setMessage(`${successMessage}`);
         setName('');
         setAddress('');
       } else {
