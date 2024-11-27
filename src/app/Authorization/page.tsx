@@ -113,6 +113,7 @@ export default function Authorization() {
 
       if (response.status === 200) {
         setStatusMessage(`${role === 'admin' ? 'Admin' : 'Manager'} sign-up successful.`);
+        router.push('/Manager/createRestaurant');
       } else {
         setStatusMessage(response.data.message || 'Sign-up failed. Please try again.');
       }
