@@ -119,6 +119,18 @@ export default function CreateRestaurant() {
       {message && (
         <p className="mt-4 text-center text-gray-800">{message}</p>
       )}
+
+      <div className="mt-6 text-center">
+        <p className="text-gray-700 mb-2">
+          If you have already created a restaurant, click the button below to go to the restaurant hub.
+        </p>
+        <button
+          onClick={() => router.push('/Manager/restaurantHub')}
+          className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:shadow-outline"
+        >
+          Go to Restaurant Hub
+        </button>
+      </div>
     </main>
   );
 }
