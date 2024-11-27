@@ -90,7 +90,7 @@ export default function Authorization() {
         setStatusMessage('Manager login successful.');
         sessionStorage.setItem('username', formData.username);
         sessionStorage.setItem('password', formData.password);
-        router.push('/Authorization/Manager');
+        router.push('/Manager/createRestaurant');
       } else {
         setStatusMessage('Invalid manager credentials. Please try again.');
       }
