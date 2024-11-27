@@ -38,6 +38,7 @@ export default function RestaurantManager() {
         }
     };
 
+<<<<<<< HEAD
     // Create Restaurant
     const handleCreateRestaurant = async () => {
         try {
@@ -67,6 +68,11 @@ export default function RestaurantManager() {
     // Redirect to Activate Restaurant Page
     const handleRedirectToActivate = () => {
         router.push(`/Manager/activateRestaurant`);
+=======
+    // Redirect to the Edit Restaurant page
+    const redirectToEditRestaurant = () => {
+        router.push('/Manager/editRestaurant'); // Define the route for the editRestaurant page
+>>>>>>> 964076062616099a7f57366eb37b495206427502
     };
 
     // UseEffect to check restaurant association on mount
@@ -95,44 +101,37 @@ export default function RestaurantManager() {
                             </p>
                         </div>
 
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="name">
-                                Edit Name
-                            </label>
-                            <input
-                                id="name"
-                                name="name"
-                                type="text"
-                                value={editFields.name}
-                                onChange={(e) => setEditFields({ ...editFields, name: e.target.value })}
-                                className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            />
-                        </div>
-
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="address">
-                                Edit Address
-                            </label>
-                            <input
-                                id="address"
-                                name="address"
-                                type="text"
-                                value={editFields.address}
-                                onChange={(e) => setEditFields({ ...editFields, address: e.target.value })}
-                                className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            />
-                        </div>
-
                         <div className="flex flex-col mt-6 space-y-4">
                             <button
+<<<<<<< HEAD
                                 onClick={handleRedirectToActivate}
-                                className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
+=======
+                                onClick={redirectToEditRestaurant}
+                                className="bg-purple-500 text-white py-2 px-4 rounded-md hover:bg-purple-600 transition duration-200"
                             >
-                                Activate Restaurant
+                                Edit Restaurant
                             </button>
                             <button
+                                onClick={() => setStatusMessage('Feature Coming Soon')}
+>>>>>>> 964076062616099a7f57366eb37b495206427502
+                                className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
+                            >
+                                Review Day's Availability
+                            </button>
+                            <button
+<<<<<<< HEAD
                                 onClick={handleCreateRestaurant}
                                 className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-200"
+=======
+                                onClick={() => setStatusMessage('Feature Coming Soon')}
+                                className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-200"
+                            >
+                                Create Restaurant
+                            </button>
+                            <button
+                                onClick={() => setStatusMessage('Feature Coming Soon')}
+                                className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition duration-200"
+>>>>>>> 964076062616099a7f57366eb37b495206427502
                             >
                                 Update Restaurant
                             </button>
@@ -140,41 +139,8 @@ export default function RestaurantManager() {
                     </>
                 ) : (
                     <>
-                        <h2 className="text-xl font-bold mb-4">Create Restaurant</h2>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="name">
-                                Name
-                            </label>
-                            <input
-                                id="name"
-                                name="name"
-                                type="text"
-                                value={editFields.name}
-                                onChange={(e) => setEditFields({ ...editFields, name: e.target.value })}
-                                className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            />
-                        </div>
-
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="address">
-                                Address
-                            </label>
-                            <input
-                                id="address"
-                                name="address"
-                                type="text"
-                                value={editFields.address}
-                                onChange={(e) => setEditFields({ ...editFields, address: e.target.value })}
-                                className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            />
-                        </div>
-
-                        <button
-                            onClick={handleCreateRestaurant}
-                            className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-200"
-                        >
-                            Create Restaurant
-                        </button>
+                        <h2 className="text-xl font-bold mb-4">No Restaurant Associated</h2>
+                        <p className="text-gray-500">Please create a restaurant to get started.</p>
                     </>
                 )}
 

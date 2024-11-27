@@ -32,7 +32,7 @@ export default function RestaurantHub() {
 
       {/* Action Buttons */}
       <div className="grid grid-cols-2 gap-6">
-        <Link href="/Manager/editRestaurant">
+        <Link href="/Manager/editResTaurant">
           <button className="w-56 bg-purple-500 text-white py-3 rounded-md text-lg hover:bg-purple-600 transition duration-200">
             Edit Restaurant
           </button>

@@ -1,11 +1,13 @@
 'use client';
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 export default function CreateRestaurant() {
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [message, setMessage] = useState('');
+  const router = useRouter(); // Initialize the router
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,6 +38,8 @@ export default function CreateRestaurant() {
         setMessage(`${successMessage}`);
         setName('');
         setAddress('');
+        
+        router.push('/Manager/restaurantHub');
       } else {
         setMessage(responseData.message || 'Failed to create restaurant.');
         console.log('Unexpected response:', responseData);
