@@ -9,6 +9,18 @@ export default function UpdateRestaurant() {
   const [closeHour, setCloseHour] = useState('');
   const [openDate, setOpenDate] = useState('');
   const [closeDate, setCloseDate] = useState('');
+  const [numTables, setNumTables] = useState({
+    numTable1: '',
+    numTable2: '',
+    numTable3: '',
+    numTable4: '',
+    numTable5: '',
+    numTable6: '',
+    numTable7: '',
+    numTable8: '',
+    numTable9: '',
+    numTable10: '',
+  });
   const [message, setMessage] = useState('');
 
   // Function to get username and password from session storage
@@ -30,15 +42,18 @@ export default function UpdateRestaurant() {
       return;
     }
 
-    // Validate input fields
-    if (!name || !address || !openHour || !closeHour || !openDate || !closeDate) {
-      setMessage('Please fill in all the fields.');
-      console.error('Validation failed: Missing required fields.');
-      return;
-    }
-
     try {
-      const payload = { username, password, name, address, openHour, closeHour, openDate, closeDate };
+      const payload = {
+        username,
+        password,
+        name,
+        address,
+        openHour,
+        closeHour,
+        openDate,
+        closeDate,
+        ...numTables, // Add numTable1 to numTable10
+      };
       console.log('Sending request with payload:', payload);
 
       // Call the Lambda function
@@ -64,6 +79,11 @@ export default function UpdateRestaurant() {
       console.error('Error occurred:', error.response?.data || error.message);
       setMessage('An error occurred. Please try again.');
     }
+  };
+
+  const handleNumTableChange = (e) => {
+    const { name, value } = e.target;
+    setNumTables((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -153,6 +173,23 @@ export default function UpdateRestaurant() {
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
+
+        {[...Array(10)].map((_, index) => (
+          <div className="mb-4" key={`numTable${index + 1}`}>
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor={`numTable${index + 1}`}>
+              Number of Seats in Tables {index + 1}
+            </label>
+            <input
+              id={`numTable${index + 1}`}
+              name={`numTable${index + 1}`}
+              type="number"
+              placeholder={`Enter number of seats in tables ${index + 1}`}
+              value={numTables[`numTable${index + 1}`] || ''}
+              onChange={handleNumTableChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+        ))}
 
         <button
           type="submit"
