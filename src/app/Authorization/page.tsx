@@ -90,7 +90,7 @@ export default function Authorization() {
 
         console.log('Response from backend:', response);
 
-        if (response.status === 201) {
+        if (response.status === 200) {
           setStatusMessage('Sign-up successful. New manager created.');
         } else {
           setStatusMessage(response.data.message || 'Sign-up failed. Please try again.');
