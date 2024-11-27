@@ -38,23 +38,6 @@ export default function RestaurantManager() {
         }
     };
 
-    // Function to validate the restaurant ID
-    const validateRestaurantId = async (idRestaurant) => {
-        try {
-            const response = await instance.post('/validateRestaurantId', { idRestaurant });
-
-            if (response.status === 200 && response.data.isValid) {
-                return true;
-            }
-            setStatusMessage('Invalid restaurant ID.');
-            return false;
-        } catch (error) {
-            console.error('Error validating restaurant ID:', error);
-            setStatusMessage('An error occurred during validation.');
-            return false;
-        }
-    };
-
     // Create Restaurant
     const handleCreateRestaurant = async () => {
         try {
@@ -81,79 +64,9 @@ export default function RestaurantManager() {
         }
     };
 
-    // Edit Restaurant
-    const handleEditRestaurant = async () => {
-        try {
-            if (!editFields.name || !editFields.address) {
-                setStatusMessage('Name and address are required.');
-                return;
-            }
-
-            const isValid = await validateRestaurantId(restaurantDetails.idRestaurant);
-            if (!isValid) return;
-
-            const response = await instance.post('/editRestaurant', {
-                idRestaurant: restaurantDetails.idRestaurant,
-                name: editFields.name,
-                address: editFields.address,
-            });
-
-            if (response.status === 200) {
-                setStatusMessage('Restaurant updated successfully.');
-                checkManagerRestaurantAssociation(); // Refresh details
-            } else {
-                setStatusMessage('Failed to update restaurant.');
-            }
-        } catch (error) {
-            console.error('Error editing restaurant:', error);
-            setStatusMessage('An error occurred. Please try again later.');
-        }
-    };
-
-    // Activate Restaurant
-    const handleActivateRestaurant = async () => {
-        try {
-            const isValid = await validateRestaurantId(restaurantDetails.idRestaurant);
-            if (!isValid) return;
-
-            const response = await instance.post('/activateRestaurant', {
-                idRestaurant: restaurantDetails.idRestaurant,
-            });
-
-            if (response.status === 200) {
-                setStatusMessage('Restaurant activated successfully.');
-                checkManagerRestaurantAssociation(); // Refresh details
-            } else {
-                setStatusMessage('Failed to activate restaurant.');
-            }
-        } catch (error) {
-            console.error('Error activating restaurant:', error);
-            setStatusMessage('An error occurred. Please try again later.');
-        }
-    };
-
-    // Delete Restaurant
-    const handleDeleteRestaurant = async () => {
-        try {
-            const isValid = await validateRestaurantId(restaurantDetails.idRestaurant);
-            if (!isValid) return;
-
-            const response = await instance.post('/deleteRestaurant', {
-                idRestaurant: restaurantDetails.idRestaurant,
-            });
-
-            if (response.status === 200) {
-                setStatusMessage('Restaurant deleted successfully.');
-                setRestaurantDetails(null);
-                setIsRestaurantAssociated(false);
-                setEditFields({ name: '', address: '' }); // Clear fields
-            } else {
-                setStatusMessage('Failed to delete restaurant.');
-            }
-        } catch (error) {
-            console.error('Error deleting restaurant:', error);
-            setStatusMessage('An error occurred. Please try again later.');
-        }
+    // Redirect to Activate Restaurant Page
+    const handleRedirectToActivate = () => {
+        router.push(`/Manager/activateRestaurant`);
     };
 
     // UseEffect to check restaurant association on mount
@@ -212,22 +125,16 @@ export default function RestaurantManager() {
 
                         <div className="flex flex-col mt-6 space-y-4">
                             <button
-                                onClick={handleEditRestaurant}
-                                className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-200"
-                            >
-                                Update Restaurant
-                            </button>
-                            <button
-                                onClick={handleActivateRestaurant}
+                                onClick={handleRedirectToActivate}
                                 className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
                             >
                                 Activate Restaurant
                             </button>
                             <button
-                                onClick={handleDeleteRestaurant}
-                                className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition duration-200"
+                                onClick={handleCreateRestaurant}
+                                className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-200"
                             >
-                                Delete Restaurant
+                                Update Restaurant
                             </button>
                         </div>
                     </>
