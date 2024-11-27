@@ -43,7 +43,7 @@ export default function UpdateRestaurant() {
 
       // Call the Lambda function
       const response = await axios.post(
-        'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/updateRestaurant', // Replace with your API Gateway endpoint
+        'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/editRestaurant', // Replace with your API Gateway endpoint
         payload,
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -68,7 +68,7 @@ export default function UpdateRestaurant() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Update Restaurant</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Edit Restaurant</h1>
 
       <form
         onSubmit={handleSubmit}
