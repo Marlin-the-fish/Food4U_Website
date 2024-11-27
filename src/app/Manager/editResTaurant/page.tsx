@@ -1,178 +1,168 @@
 'use client';
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
 
-const instance = axios.create({
-    baseURL: 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial',
-});
+export default function UpdateRestaurant() {
+  const [name, setName] = useState('');
+  const [address, setAddress] = useState('');
+  const [openHour, setOpenHour] = useState('');
+  const [closeHour, setCloseHour] = useState('');
+  const [openDate, setOpenDate] = useState('');
+  const [closeDate, setCloseDate] = useState('');
+  const [message, setMessage] = useState('');
 
-export default function EditRestaurant() {
-    const [formData, setFormData] = useState({
-        restaurantName: '',
-        streetAddress: '',
-        openingTime: '',
-        closingTime: '',
-        openDate: '',
-        closeDate: '',
-    });
-    const [statusMessage, setStatusMessage] = useState('');
-    const router = useRouter();
+  // Function to get username and password from session storage
+  const getCredentials = () => {
+    const username = sessionStorage.getItem('username');
+    const password = sessionStorage.getItem('password');
+    return { username, password };
+  };
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setStatusMessage(''); // Clear the status message before submission
+    const { username, password } = getCredentials();
 
-        try {
-            const response = await instance.post('/editRestaurant', {
-                idRestaurant: '1', // Replace with dynamic restaurant ID if needed
-                name: formData.restaurantName,
-                address: formData.streetAddress,
-                openHour: formData.openingTime,
-                closeHour: formData.closingTime,
-                openDate: formData.openDate,
-                closeDate: formData.closeDate,
-            });
+    // Validate credentials
+    if (!username || !password) {
+      setMessage('User is not authenticated. Please log in.');
+      console.error('Missing username or password in session storage.');
+      return;
+    }
 
-            if (response.status === 200) {
-                setStatusMessage('Restaurant updated successfully!');
-                router.push('/Manager/restaurantHub'); // Redirect to the Owner Hub Menu after success
-            } else {
-                setStatusMessage(response.data.message || 'Failed to update the restaurant.');
-            }
-        } catch (error) {
-            console.error('Error updating restaurant:', error);
-            setStatusMessage('An error occurred. Please try again later.');
-        }
-    };
+    // Validate input fields
+    if (!name || !address || !openHour || !closeHour || !openDate || !closeDate) {
+      setMessage('Please fill in all the fields.');
+      console.error('Validation failed: Missing required fields.');
+      return;
+    }
 
-    return (
-        <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-purple-50">
-            <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-8">
-                <h1 className="text-2xl font-bold mb-6 text-center text-black">Edit Restaurant</h1>
-                <p className="text-center text-gray-500 mb-4">You can edit your restaurant here</p>
+    try {
+      const payload = { username, password, name, address, openHour, closeHour, openDate, closeDate };
+      console.log('Sending request with payload:', payload);
 
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="restaurantName">
-                            Restaurant name:
-                        </label>
-                        <input
-                            id="restaurantName"
-                            name="restaurantName"
-                            type="text"
-                            value={formData.restaurantName}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 text-black"
-                        />
-                    </div>
+      // Call the Lambda function
+      const response = await axios.post(
+        'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/updateRestaurant', // Replace with your API Gateway endpoint
+        payload,
+        { headers: { 'Content-Type': 'application/json' } }
+      );
 
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="streetAddress">
-                            Street address:
-                        </label>
-                        <input
-                            id="streetAddress"
-                            name="streetAddress"
-                            type="text"
-                            value={formData.streetAddress}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 text-black"
-                        />
-                    </div>
+      console.log('Raw API Response:', response);
 
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="openingTime">
-                            Opening time:
-                        </label>
-                        <input
-                            id="openingTime"
-                            name="openingTime"
-                            type="time"
-                            value={formData.openingTime}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 text-black"
-                        />
-                    </div>
+      const responseData = response.data;
+      console.log('Parsed Response Data:', responseData);
 
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="closingTime">
-                            Closing time:
-                        </label>
-                        <input
-                            id="closingTime"
-                            name="closingTime"
-                            type="time"
-                            value={formData.closingTime}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 text-black"
-                        />
-                    </div>
+      if (response.status === 200) {
+        const { message: successMessage } = responseData;
+        setMessage(successMessage);
+      } else {
+        setMessage(responseData.message || 'Failed to update restaurant.');
+        console.error('Unexpected response:', responseData);
+      }
+    } catch (error) {
+      console.error('Error occurred:', error.response?.data || error.message);
+      setMessage('An error occurred. Please try again.');
+    }
+  };
 
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="openDate">
-                            Open date:
-                        </label>
-                        <input
-                            id="openDate"
-                            name="openDate"
-                            type="date"
-                            value={formData.openDate}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 text-black"
-                        />
-                    </div>
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Update Restaurant</h1>
 
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="closeDate">
-                            Close date:
-                        </label>
-                        <input
-                            id="closeDate"
-                            name="closeDate"
-                            type="date"
-                            value={formData.closeDate}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 text-black"
-                        />
-                    </div>
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-md bg-white shadow-md rounded px-8 pt-6 pb-8"
+      >
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+            Restaurant Name
+          </label>
+          <input
+            id="name"
+            type="text"
+            placeholder="Enter restaurant name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
 
-                    <div className="flex justify-between">
-                        <button
-                            type="button"
-                            onClick={() => router.push('/OwnerHubMenu')}
-                            className="bg-purple-300 text-white py-2 px-4 rounded-md hover:bg-purple-400 transition duration-200"
-                        >
-                            Back
-                        </button>
-                        <button
-                            type="submit"
-                            className="bg-purple-500 text-white py-2 px-4 rounded-md hover:bg-purple-600 transition duration-200"
-                        >
-                            Confirm
-                        </button>
-                    </div>
-                </form>
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="address">
+            Address
+          </label>
+          <input
+            id="address"
+            type="text"
+            placeholder="Enter restaurant address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
 
-                {statusMessage && (
-                    <div className="mt-4 text-center">
-                        <p className={`text-sm ${statusMessage.includes('success') ? 'text-green-500' : 'text-red-500'}`}>
-                            {statusMessage}
-                        </p>
-                    </div>
-                )}
-            </div>
-        </main>
-    );
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="openHour">
+            Open Hour
+          </label>
+          <input
+            id="openHour"
+            type="time"
+            value={openHour}
+            onChange={(e) => setOpenHour(e.target.value)}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="closeHour">
+            Close Hour
+          </label>
+          <input
+            id="closeHour"
+            type="time"
+            value={closeHour}
+            onChange={(e) => setCloseHour(e.target.value)}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="openDate">
+            Open Date
+          </label>
+          <input
+            id="openDate"
+            type="date"
+            value={openDate}
+            onChange={(e) => setOpenDate(e.target.value)}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="closeDate">
+            Close Date
+          </label>
+          <input
+            id="closeDate"
+            type="date"
+            value={closeDate}
+            onChange={(e) => setCloseDate(e.target.value)}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="bg-purple-500 text-white font-bold py-2 px-4 rounded hover:bg-purple-600 focus:outline-none focus:shadow-outline"
+        >
+          Update Restaurant
+        </button>
+      </form>
+
+      {message && <p className="mt-4 text-center text-gray-800">{message}</p>}
+    </main>
+  );
 }
