@@ -7,7 +7,14 @@ export default function CreateRestaurant() {
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [message, setMessage] = useState('');
-  const router = useRouter(); // Initialize the router
+  const router = useRouter();
+
+  // Function to get username and password from session storage
+  const getCredentials = () => {
+    const username = sessionStorage.getItem('username');
+    const password = sessionStorage.getItem('password');
+    return { username, password };
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,8 +25,16 @@ export default function CreateRestaurant() {
       return;
     }
 
+    const { username, password } = getCredentials();
+
+    if (!username || !password) {
+      setMessage('User is not authenticated. Please log in.');
+      console.log('Missing username or password in session storage.');
+      return;
+    }
+
     try {
-      const payload = { name, address };
+      const payload = { name, address, username, password };
       console.log('Sending request with payload:', payload);
 
       const response = await axios.post(
@@ -30,19 +45,20 @@ export default function CreateRestaurant() {
 
       console.log('Raw API Response:', response);
 
-      const responseData = JSON.parse(response.data.body);
-      console.log('Parsed Response Data:', responseData);
-
       if (response.status === 200) {
+        const responseData = response.data; // Assuming Lambda sends JSON directly
+        console.log('Parsed Response Data:', responseData);
+
         const { message: successMessage, restaurantId } = responseData;
-        setMessage(`${successMessage}`);
+        setMessage(`${successMessage} (ID: ${restaurantId})`);
         setName('');
         setAddress('');
-        
+
+        // Redirect to the restaurant hub
         router.push('/Manager/restaurantHub');
       } else {
-        setMessage(responseData.message || 'Failed to create restaurant.');
-        console.log('Unexpected response:', responseData);
+        setMessage(response.data.message || 'Failed to create restaurant.');
+        console.log('Unexpected response:', response.data);
       }
     } catch (error) {
       console.error('Error occurred:', error.response?.data || error.message);

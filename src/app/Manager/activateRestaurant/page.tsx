@@ -3,26 +3,35 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 export default function ToggleActiveStatus() {
-  const [idRestaurant, setIdRestaurant] = useState('');
   const [message, setMessage] = useState('');
+
+  // Function to get username and password from session storage
+  const getCredentials = () => {
+    const username = sessionStorage.getItem('username');
+    const password = sessionStorage.getItem('password');
+    return { username, password };
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate input
-    if (!idRestaurant) {
-      setMessage('Please provide the Restaurant ID.');
-      console.log('Validation failed: Missing idRestaurant.');
+    // Get username and password from session storage
+    const { username, password } = getCredentials();
+
+    // Validate credentials
+    if (!username || !password) {
+      setMessage('User is not authenticated. Please log in.');
+      console.log('Missing username or password in session storage.');
       return;
     }
 
     try {
-      const payload = { idRestaurant };
+      const payload = { username, password };
       console.log('Sending request with payload:', payload);
 
       // Call the Lambda function
       const response = await axios.post(
-        'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/activateRestaurant', // Replace with your API Gateway endpoint
+        'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/activateRestaurant',
         payload,
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -35,7 +44,6 @@ export default function ToggleActiveStatus() {
       if (response.status === 200) {
         const { message: successMessage } = responseData;
         setMessage(successMessage);
-        setIdRestaurant(''); // Clear input
       } else {
         setMessage(responseData.message || 'Failed to toggle activeStatus.');
         console.log('Unexpected response:', responseData);
@@ -56,26 +64,13 @@ export default function ToggleActiveStatus() {
         onSubmit={handleSubmit}
         className="w-full max-w-md bg-white shadow-md rounded px-8 pt-6 pb-8"
       >
-        <div className="mb-4">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="idRestaurant"
-          >
-            Restaurant ID
-          </label>
-          <input
-            id="idRestaurant"
-            type="text"
-            placeholder="Enter Restaurant ID"
-            value={idRestaurant}
-            onChange={(e) => setIdRestaurant(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-        </div>
+        <p className="text-gray-700 text-center mb-4">
+          This action toggles the active status of the restaurant associated with your account.
+        </p>
 
         <button
           type="submit"
-          className="bg-purple-500 text-white font-bold py-2 px-4 rounded hover:bg-purple-600 focus:outline-none focus:shadow-outline"
+          className="w-full bg-purple-500 text-white font-bold py-2 px-4 rounded hover:bg-purple-600 focus:outline-none focus:shadow-outline"
         >
           Toggle Active Status
         </button>
