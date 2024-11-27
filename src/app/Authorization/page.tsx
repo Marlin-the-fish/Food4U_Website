@@ -52,19 +52,21 @@ export default function Authorization() {
 
     try {
       const response = await instance.post(endpoint, formData);
+      console.log("hello")
 
-      if (response.data.success) {
-        if (response.data.success.includes('Correct')) {
-          setStatusMessage('Login successful.');
-          sessionStorage.setItem('username', formData.username);
-          sessionStorage.setItem('password', formData.password);
+      // Parse the body from the Lambda response
+      const data = JSON.parse(response.data.body);
+      console.log("Parsed response data:", data);
 
-          // Redirect based on role
-          const redirectPath = role === 'admin' ? '/Authorization/Admin' : '/Authorization/Manager';
-          router.push(redirectPath);
-        } else {
-          setStatusMessage('Invalid credentials. Please try again.');
-        }
+      if (data.message.includes('Correct')) {
+        console.log("hello3")
+        setStatusMessage('Login successful.');
+        sessionStorage.setItem('username', formData.username);
+        sessionStorage.setItem('password', formData.password);
+
+        // Redirect based on role
+        const redirectPath = role === 'admin' ? '/Authorization/Admin' : '/Authorization/Manager';
+        router.push(redirectPath);
       } else {
         setStatusMessage('Invalid credentials. Please try again.');
       }
