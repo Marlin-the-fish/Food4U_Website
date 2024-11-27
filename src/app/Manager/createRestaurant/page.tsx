@@ -8,43 +8,43 @@ export default function CreateRestaurant() {
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!name || !address) {
-    setMessage('Please provide both name and address.');
-    console.log('Validation failed: Missing name or address.');
-    return;
-  }
-
-  try {
-    const payload = { name, address };
-    console.log('Sending request with payload:', payload);
-
-    const response = await axios.post(
-      'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/createRestaurant',
-      payload,
-      { headers: { 'Content-Type': 'application/json' } }
-    );
-
-    console.log('Raw API Response:', response);
-
-    const responseData = JSON.parse(response.data.body);
-    console.log('Parsed Response Data:', responseData);
-
-    if (response.status === 200) {
-      const { message: successMessage, restaurantId } = responseData;
-      setMessage(`${successMessage} ID: ${restaurantId}`);
-      setName('');
-      setAddress('');
-    } else {
-      setMessage(responseData.message || 'Failed to create restaurant.');
-      console.log('Unexpected response:', responseData);
+    if (!name || !address) {
+      setMessage('Please provide both name and address.');
+      console.log('Validation failed: Missing name or address.');
+      return;
     }
-  } catch (error) {
-    console.error('Error occurred:', error.response?.data || error.message);
-    setMessage('An error occurred. Please try again.');
-  }
-};
+
+    try {
+      const payload = { name, address };
+      console.log('Sending request with payload:', payload);
+
+      const response = await axios.post(
+        'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/createRestaurant',
+        payload,
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+
+      console.log('Raw API Response:', response);
+
+      const responseData = JSON.parse(response.data.body);
+      console.log('Parsed Response Data:', responseData);
+
+      if (response.status === 200) {
+        const { message: successMessage, restaurantId } = responseData;
+        setMessage(`${successMessage} ID: ${restaurantId}`);
+        setName('');
+        setAddress('');
+      } else {
+        setMessage(responseData.message || 'Failed to create restaurant.');
+        console.log('Unexpected response:', responseData);
+      }
+    } catch (error) {
+      console.error('Error occurred:', error.response?.data || error.message);
+      setMessage('An error occurred. Please try again.');
+    }
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100">
