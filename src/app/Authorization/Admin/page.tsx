@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
 const instance = axios.create({
-  baseURL: 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial' 
+  baseURL: 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial'
 });
 
 export default function AdminPage() {
@@ -40,19 +40,19 @@ export default function AdminPage() {
   // Handle Delete Restaurant
   const handleDeleteRestaurant = async () => {
     try {
-        const response = await instance.post('/deleteRestaurantAdmin', {
-          username: sessionStorage.getItem('username').toString(),
-          password: sessionStorage.getItem('password').toString(),
-          restaurantID: selectedRestaurant
-        });
-        if (response.data.isDeleted) {
-          setStatusMessage('Restaurant deleted successfully.');
-          fetchRestaurants(); // Refresh the list
-          setSelectedRestaurant(''); // Hide buttons
-        } else {
-          setStatusMessage('Failed to delete restaurant.');
-        }
-      }  catch (error) {
+      const response = await instance.post('/deleteRestaurantAdmin', {
+        username: sessionStorage.getItem('username').toString(),
+        password: sessionStorage.getItem('password').toString(),
+        restaurantID: selectedRestaurant
+      });
+      if (response.data.isDeleted) {
+        setStatusMessage('Restaurant deleted successfully.');
+        fetchRestaurants(); // Refresh the list
+        setSelectedRestaurant(''); // Hide buttons
+      } else {
+        setStatusMessage('Failed to delete restaurant.');
+      }
+    } catch (error) {
       setStatusMessage('An error occurred. Please try again later.');
     }
   };
@@ -181,7 +181,7 @@ export default function AdminPage() {
 
         <div className="mt-4 text-center">
           <button
-            onClick={() => router.push('/Authorization')}
+            onClick={() => router.push('/Log_in')}
             className="text-blue-500 hover:underline"
           >
             Back to Admin Login

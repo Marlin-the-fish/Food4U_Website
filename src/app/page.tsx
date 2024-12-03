@@ -8,7 +8,7 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100 relative">
       {/* Top-right Login Button */}
       <div className="absolute top-4 right-4">
-        <Link href="/Authorization">
+        <Link href="/Log_in">
           <button className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200">
             Login
           </button>
