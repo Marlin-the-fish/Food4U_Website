@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useRouter } from 'next/navigation'; // Import useRouter for redirection
 
 export default function UpdateRestaurant() {
   const [name, setName] = useState('');
@@ -9,21 +10,11 @@ export default function UpdateRestaurant() {
   const [closeHour, setCloseHour] = useState('');
   const [openDate, setOpenDate] = useState('');
   const [closeDate, setCloseDate] = useState('');
-  const [numTables, setNumTables] = useState({
-    numTable1: '',
-    numTable2: '',
-    numTable3: '',
-    numTable4: '',
-    numTable5: '',
-    numTable6: '',
-    numTable7: '',
-    numTable8: '',
-    numTable9: '',
-    numTable10: '',
-  });
+  const [tables, setTables] = useState([]);
+  const [numTables, setNumTables] = useState('');
   const [message, setMessage] = useState('');
+  const router = useRouter(); // Initialize the router for navigation
 
-  // Function to get username and password from session storage
   const getCredentials = () => {
     const username = sessionStorage.getItem('username');
     const password = sessionStorage.getItem('password');
@@ -32,10 +23,8 @@ export default function UpdateRestaurant() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const { username, password } = getCredentials();
 
-    // Validate credentials
     if (!username || !password) {
       setMessage('User is not authenticated. Please log in.');
       console.error('Missing username or password in session storage.');
@@ -52,13 +41,11 @@ export default function UpdateRestaurant() {
         closeHour,
         openDate,
         closeDate,
-        ...numTables, // Add numTable1 to numTable10
+        tables, // Pass the table data to the backend
       };
-      console.log('Sending request with payload:', payload);
 
-      // Call the Lambda function
       const response = await axios.post(
-        'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/editRestaurant', // Replace with your API Gateway endpoint
+        ' https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/editRestaurant',
         payload,
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -70,20 +57,46 @@ export default function UpdateRestaurant() {
 
       if (response.status === 200) {
         const { message: successMessage } = responseData;
-        setMessage(successMessage);
+        setMessage(response.data.message || 'Restaurant updated successfully.');
+
+        // Redirect to /Manager/restaurantHub after a successful update
+        setTimeout(() => {
+          router.push('/Manager/restaurantHub');
+        }, 2000); // Add a small delay for user feedback
       } else {
-        setMessage(responseData.message || 'Failed to update restaurant.');
-        console.error('Unexpected response:', responseData);
+        setMessage(response.data.message || 'Failed to update restaurant.');
       }
     } catch (error) {
-      console.error('Error occurred:', error.response?.data || error.message);
+      console.error(error);
       setMessage('An error occurred. Please try again.');
     }
   };
 
-  const handleNumTableChange = (e) => {
-    const { name, value } = e.target;
-    setNumTables((prev) => ({ ...prev, [name]: value }));
+  const handleNumTablesChange = (e) => {
+    const count = parseInt(e.target.value, 10);
+    setNumTables(e.target.value);
+
+    if (count > 0) {
+      const updatedTables = Array.from({ length: count }, (_, index) => ({
+        name: `Table${index + 1}`,
+        seats: '',
+      }));
+      setTables(updatedTables);
+    } else {
+      setTables([]);
+    }
+  };
+
+  const handleTableChange = (index, value) => {
+    setTables((prev) =>
+      prev.map((table, i) =>
+        i === index ? { ...table, seats: value } : table
+      )
+    );
+  };
+
+  const handleDeleteTable = (index) => {
+    setTables((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -174,20 +187,39 @@ export default function UpdateRestaurant() {
           />
         </div>
 
-        {[...Array(10)].map((_, index) => (
-          <div className="mb-4" key={`numTable${index + 1}`}>
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor={`numTable${index + 1}`}>
-              Number of Seats in Tables {index + 1}
-            </label>
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="numTables">
+            Number of Tables
+          </label>
+          <input
+            id="numTables"
+            type="number"
+            placeholder="Enter number of tables"
+            value={numTables}
+            onChange={handleNumTablesChange}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+
+        {tables.map((table, index) => (
+          <div className="mb-4 flex items-center" key={index}>
+            <span className="block text-gray-700 text-sm font-bold mb-2 mr-4">
+              {table.name}
+            </span>
             <input
-              id={`numTable${index + 1}`}
-              name={`numTable${index + 1}`}
               type="number"
-              placeholder={`Enter number of seats in tables ${index + 1}`}
-              value={numTables[`numTable${index + 1}`] || ''}
-              onChange={handleNumTableChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              placeholder="Seats"
+              value={table.seats}
+              onChange={(e) => handleTableChange(index, e.target.value)}
+              className="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-4"
             />
+            <button
+              type="button"
+              onClick={() => handleDeleteTable(index)}
+              className="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-600 focus:outline-none focus:shadow-outline"
+            >
+              Delete
+            </button>
           </div>
         ))}
 
