@@ -271,6 +271,7 @@ export default function UpdateRestaurant() {
           <input
             id="numTables"
             type="number"
+            min="0"
             placeholder="Enter number of tables"
             value={numTables}
             onChange={handleNumTablesChange}
@@ -286,6 +287,7 @@ export default function UpdateRestaurant() {
             <input
               type="number"
               placeholder="Seats"
+              min="0"
               value={table.seats}
               onChange={(e) => handleTableChange(index, e.target.value)}
               className="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-4"
