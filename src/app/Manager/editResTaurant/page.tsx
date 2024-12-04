@@ -1,19 +1,20 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useRouter } from 'next/navigation'; // Import useRouter for redirection
+import { useRouter } from 'next/navigation';
 
 export default function UpdateRestaurant() {
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-  const [openHour, setOpenHour] = useState('');
-  const [closeHour, setCloseHour] = useState('');
+  const [openHour, setOpenHour] = useState(0);
+  const [closeHour, setCloseHour] = useState(0);
   const [openDate, setOpenDate] = useState('');
   const [closeDate, setCloseDate] = useState('');
   const [tables, setTables] = useState([]);
   const [numTables, setNumTables] = useState('');
+  const [tablesToDelete, setTablesToDelete] = useState([]);
   const [message, setMessage] = useState('');
-  const router = useRouter(); // Initialize the router for navigation
+  const router = useRouter();
 
   const getCredentials = () => {
     const username = sessionStorage.getItem('username');
@@ -21,13 +22,57 @@ export default function UpdateRestaurant() {
     return { username, password };
   };
 
+  useEffect(() => {
+    const fetchRestaurantData = async () => {
+      const { username, password } = getCredentials();
+
+      if (!username || !password) {
+        setMessage('User is not authenticated. Please log in.');
+        return;
+      }
+
+      try {
+        const response = await axios.post(
+          'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/getRestaurantIdfromManagerUsername',
+          { username, password },
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+
+        console.log('Fetched restaurant data:', response.data);
+
+        const responseBody = typeof response.data.body === 'string'
+          ? JSON.parse(response.data.body)
+          : response.data.body;
+
+        const { restaurant, tables } = responseBody;
+
+        setName(restaurant.name || '');
+        setAddress(restaurant.address || '');
+        setOpenHour(restaurant.openHour || '');
+        setCloseHour(restaurant.closeHour || '');
+        setOpenDate(restaurant.openDate ? restaurant.openDate.slice(0, 10) : '');
+        setCloseDate(restaurant.closeDate ? restaurant.closeDate.slice(0, 10) : '');
+        setTables(tables.map((table) => ({
+          idTable: table.idTable,
+          name: `Table ${table.tableNumber}`,
+          seats: table.numOfSeats,
+        })));
+        setNumTables(tables.length.toString());
+      } catch (error) {
+        console.error('Error fetching restaurant details:', error.response?.data || error.message);
+        setMessage('Failed to fetch restaurant details.');
+      }
+    };
+
+    fetchRestaurantData();
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { username, password } = getCredentials();
 
     if (!username || !password) {
       setMessage('User is not authenticated. Please log in.');
-      console.error('Missing username or password in session storage.');
       return;
     }
 
@@ -41,28 +86,20 @@ export default function UpdateRestaurant() {
         closeHour,
         openDate,
         closeDate,
-        tables, // Pass the table data to the backend
+        tables,
       };
 
       const response = await axios.post(
-        ' https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/editRestaurant',
+        'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/editRestaurant',
         payload,
         { headers: { 'Content-Type': 'application/json' } }
       );
 
-      console.log('Raw API Response:', response);
-
-      const responseData = response.data;
-      console.log('Parsed Response Data:', responseData);
-
       if (response.status === 200) {
-        const { message: successMessage } = responseData;
         setMessage(response.data.message || 'Restaurant updated successfully.');
-
-        // Redirect to /Manager/restaurantHub after a successful update
         setTimeout(() => {
           router.push('/Manager/restaurantHub');
-        }, 2000); // Add a small delay for user feedback
+        }, 2000);
       } else {
         setMessage(response.data.message || 'Failed to update restaurant.');
       }
@@ -78,8 +115,8 @@ export default function UpdateRestaurant() {
 
     if (count > 0) {
       const updatedTables = Array.from({ length: count }, (_, index) => ({
-        name: `Table${index + 1}`,
-        seats: '',
+        name: `Table ${index + 1}`,
+        seats: tables[index]?.numOfSeats || '', // Preserve existing seats if available
       }));
       setTables(updatedTables);
     } else {
@@ -95,8 +132,42 @@ export default function UpdateRestaurant() {
     );
   };
 
-  const handleDeleteTable = (index) => {
+  const handleDeleteTable = async (index) => {
+    const { username, password } = getCredentials();
+    const tableToDelete = tables[index];
+
+    // If the table has an idTable, delete it from the database
+    if (tableToDelete.idTable) {
+      try {
+        const response = await axios.post(
+          'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/deleteTable',
+          { username, password, idTable: tableToDelete.idTable },
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+
+        if (response.status === 200) {
+          console.log('Table deleted successfully:', response.data);
+        } else {
+          console.error('Failed to delete table:', response.data);
+        }
+      } catch (error) {
+        console.error('Error deleting table:', error.response?.data || error.message);
+      }
+    }
+
+    // Remove the table from the frontend state
     setTables((prev) => prev.filter((_, i) => i !== index));
+    setNumTables((prev) => (parseInt(prev, 10) - 1).toString());
+  };
+
+  const handleAddTable = () => {
+    const newTable = {
+      idTable: null, // New table will not have an ID
+      name: `Table ${tables.length + 1}`,
+      seats: '',
+    };
+    setTables((prev) => [...prev, newTable]);
+    setNumTables((prev) => (parseInt(prev, 10) + 1).toString());
   };
 
   return (
@@ -137,26 +208,32 @@ export default function UpdateRestaurant() {
 
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="openHour">
-            Open Hour
+            Open Hour (0-23)
           </label>
           <input
             id="openHour"
-            type="time"
+            type="number"
+            min="0"
+            max="23"
+            placeholder="Enter opening hour (e.g., 9 for 9 AM or 19 for 7 PM)"
             value={openHour}
-            onChange={(e) => setOpenHour(e.target.value)}
+            onChange={(e) => setOpenHour(parseInt(e.target.value, 10))}
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
 
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="closeHour">
-            Close Hour
+            Close Hour (0-23)
           </label>
           <input
             id="closeHour"
-            type="time"
+            type="number"
+            min="0"
+            max="23"
+            placeholder="Enter closing hour (e.g., 21 for 9 PM)"
             value={closeHour}
-            onChange={(e) => setCloseHour(e.target.value)}
+            onChange={(e) => setCloseHour(parseInt(e.target.value, 10))}
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
@@ -223,12 +300,22 @@ export default function UpdateRestaurant() {
           </div>
         ))}
 
-        <button
-          type="submit"
-          className="bg-purple-500 text-white font-bold py-2 px-4 rounded hover:bg-purple-600 focus:outline-none focus:shadow-outline"
-        >
-          Update Restaurant
-        </button>
+        <div className="flex flex-col items-center">
+          <button
+            type="button"
+            onClick={handleAddTable}
+            className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-600 focus:outline-none focus:shadow-outline mb-4"
+          >
+            Add Table
+          </button>
+
+          <button
+            type="submit"
+            className="bg-purple-500 text-white font-bold py-2 px-4 rounded hover:bg-purple-600 focus:outline-none focus:shadow-outline"
+          >
+            Update Restaurant
+          </button>
+        </div>
       </form>
 
       {message && <p className="mt-4 text-center text-gray-800">{message}</p>}
