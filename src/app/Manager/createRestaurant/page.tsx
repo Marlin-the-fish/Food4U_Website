@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
@@ -13,8 +13,60 @@ export default function CreateRestaurant() {
   const getCredentials = () => {
     const username = sessionStorage.getItem('username');
     const password = sessionStorage.getItem('password');
+
+    if (!username || !password) {
+      console.log('Session storage is missing username or password.');
+    }
+
     return { username, password };
   };
+
+  // Function to check idRestaurantEmpty status
+  const checkIdRestaurantStatus = async () => {
+    const { username, password } = getCredentials();
+
+    if (!username || !password) {
+      setMessage('User is not authenticated. Please log in.');
+      console.log('Missing username or password in session storage.');
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/checkRestaurantLoginStatus',
+        { username, password },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+
+      console.log('Check idRestaurant Response:', response);
+
+      if (response.status === 200) {
+        // Parse the body if it's stringified JSON
+        let idRestaurantEmpty = null;
+        if (response.data.body) {
+          const parsedBody = JSON.parse(response.data.body);
+          idRestaurantEmpty = parsedBody.idRestaurantEmpty;
+        }
+
+        console.log('idRestaurantEmpty Status:', idRestaurantEmpty);
+
+        if (idRestaurantEmpty === false) {
+          setMessage('Restaurant already exists. Redirecting to Restaurant Hub...');
+          router.push('/Manager/restaurantHub');
+        }
+      } else {
+        console.log('Unexpected response during status check:', response.data);
+      }
+    } catch (error) {
+      console.error('Error checking idRestaurant status:', error.response?.data || error.message);
+      setMessage('An error occurred during pre-check. Please try again.');
+    }
+  };
+
+  // Use effect to perform pre-check
+  useEffect(() => {
+    checkIdRestaurantStatus();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -49,12 +101,10 @@ export default function CreateRestaurant() {
         const responseData = response.data; // Assuming Lambda sends JSON directly
         console.log('Parsed Response Data:', responseData);
 
-        const { message: successMessage, restaurantId } = responseData;
-        setMessage(`${successMessage} (ID: ${restaurantId})`);
+        const { message: successMessage } = responseData;
+        setMessage(successMessage);
         setName('');
         setAddress('');
-
-        // Redirect to the restaurant hub
         router.push('/Manager/restaurantHub');
       } else {
         setMessage(response.data.message || 'Failed to create restaurant.');
