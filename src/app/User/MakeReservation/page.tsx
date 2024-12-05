@@ -41,7 +41,7 @@ export default function Authorization() {
         console.log('Generated idUser:', idUser);
 
         // Redirect to chooseDate page
-        router.push('/User/chooseDate');
+        router.push('/User/ListActiveRestaurant');
       } else {
         console.error('Unexpected API response:', response.data);
         alert('Error: Unexpected API response structure.');

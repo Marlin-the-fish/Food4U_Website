@@ -9,13 +9,18 @@ body {
 
 .calendar-container {
     max-width: 500px;
-    margin: 80px auto;
-    padding: 30px;
+    margin: 40px auto;
+    /* Reduced margin to move it up */
+    padding: 10px;
     background: #f3e9fc;
     /* Light purple background */
     border-radius: 15px;
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
+    position: relative;
+    /* Allows fine-tuning with transform */
+    top: -20px;
+    /* Moves the container upward */
 }
 
 h1 {
@@ -43,6 +48,7 @@ p {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
+    padding: 0 20px;
 }
 
 button {

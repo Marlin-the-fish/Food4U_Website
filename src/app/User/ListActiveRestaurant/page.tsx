@@ -12,7 +12,6 @@ export default function ListActiveRestaurant() {
   const [selectedRestaurant, setSelectedRestaurant] = useState('');
   const [selectedRestaurantName, setSelectedRestaurantName] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
-  const [filterDate, setFilterDate] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch Active Restaurants
@@ -39,30 +38,18 @@ export default function ListActiveRestaurant() {
     setSelectedRestaurantName(selected ? selected.name : '');
   };
 
-  // Handle Date Filter
-  const handleDateFilter = (e) => {
-    const selectedDate = new Date(e.target.value);
-    setFilterDate(e.target.value);
-    filterRestaurants(searchQuery, e.target.value);
-  };
-
   // Handle Name Search
   const handleSearchQueryChange = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
-    filterRestaurants(query, filterDate);
+    filterRestaurants(query);
   };
 
   // Filter Restaurants
-  const filterRestaurants = (query, date) => {
-    const selectedDate = date ? new Date(date) : null;
-    const filtered = restaurants.filter((restaurant) => {
-      const matchesName = restaurant.name.toLowerCase().includes(query);
-      const matchesDate = selectedDate
-        ? new Date(restaurant.openDate) <= selectedDate && new Date(restaurant.closeDate) >= selectedDate
-        : true;
-      return matchesName && matchesDate;
-    });
+  const filterRestaurants = (query) => {
+    const filtered = restaurants.filter((restaurant) =>
+      restaurant.name.toLowerCase().includes(query)
+    );
     setFilteredRestaurants(filtered);
   };
 
@@ -71,7 +58,6 @@ export default function ListActiveRestaurant() {
     setSelectedRestaurant('');
     setSelectedRestaurantName('');
     setStatusMessage('');
-    setFilterDate('');
     setSearchQuery('');
     fetchActiveRestaurants();
   };
@@ -95,18 +81,6 @@ export default function ListActiveRestaurant() {
             value={searchQuery}
             onChange={handleSearchQueryChange}
             placeholder="Enter restaurant name"
-            className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-black mb-1" htmlFor="filterDate">
-            Filter by Date
-          </label>
-          <input
-            type="date"
-            id="filterDate"
-            value={filterDate}
-            onChange={handleDateFilter}
             className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black"
           />
         </div>

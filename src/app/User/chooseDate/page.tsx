@@ -6,7 +6,7 @@ const Calendar: React.FC = () => {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const monthNames = [
     "January",
@@ -26,7 +26,7 @@ const Calendar: React.FC = () => {
   const generateCalendar = () => {
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     const lastDate = new Date(currentYear, currentMonth + 1, 0).getDate();
-    const startDay = (firstDay === 0 ? 6 : firstDay - 1); // Adjust for Monday start
+    const startDay = firstDay === 0 ? 6 : firstDay - 1; // Adjust for Monday start
     const days: JSX.Element[] = [];
 
     // Empty slots before the first date
@@ -36,13 +36,15 @@ const Calendar: React.FC = () => {
 
     // Dates of the month
     for (let date = 1; date <= lastDate; date++) {
+      const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(date).padStart(2, "0")}`;
+
       days.push(
         <div
           key={`date-${date}`}
-          className={`date ${selectedDate?.getDate() === date && selectedDate?.getMonth() === currentMonth && selectedDate?.getFullYear() === currentYear ? "selected" : ""}`}
+          className={`date ${selectedDate === dateString ? "selected" : ""}`}
           onClick={() => {
-            setSelectedDate(new Date(currentYear, currentMonth, date));
-        }}
+            setSelectedDate(dateString);
+          }}
         >
           {date}
         </div>
@@ -64,7 +66,7 @@ const Calendar: React.FC = () => {
 
   const confirmDate = () => {
     if (selectedDate) {
-      alert(`You selected ${selectedDate.toDateString()}`);
+      alert(`You selected ${selectedDate}`);
     } else {
       alert("Please select a date!");
     }
