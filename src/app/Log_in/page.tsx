@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
@@ -12,6 +12,16 @@ export default function Login() {
     const [formData, setFormData] = useState({ username: '', password: '' });
     const [statusMessage, setStatusMessage] = useState('');
     const router = useRouter();
+    const isFirstRender = useRef(true);
+
+    useEffect(() => {
+        if (isFirstRender.current) {
+            // Clear sessionStorage on the first render
+            sessionStorage.clear();
+            console.log('Cleared sessionStorage on first render');
+            isFirstRender.current = false; // Mark as no longer the first render
+        }
+    }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;

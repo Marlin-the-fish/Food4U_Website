@@ -43,7 +43,7 @@ export default function UpdateRestaurant() {
           ? JSON.parse(response.data.body)
           : response.data.body;
 
-        const { restaurant, tables } = responseBody;
+        const { restaurant, tables, closeDates } = responseBody;
 
         setName(restaurant.name || '');
         setAddress(restaurant.address || '');
