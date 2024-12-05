@@ -1,0 +1,116 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f3e9fc;
+    /* Light purple background */
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+.calendar-container {
+    max-width: 500px;
+    margin: 80px auto;
+    padding: 30px;
+    background: #f3e9fc;
+    /* Light purple background */
+    border-radius: 15px;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+h1 {
+    font-size: 30px;
+    /* Slightly larger title */
+    color: #000;
+    /* Black text */
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 18px;
+    /* Slightly larger subtitle */
+    color: #000;
+    /* Black text */
+    margin-bottom: 25px;
+}
+
+.calendar {
+    margin-top: 15px;
+}
+
+.month-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+button {
+    padding: 8px 15px;
+    font-size: 16px;
+    background-color: #7b6ef6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #5a4dcf;
+}
+
+.monthYear {
+    font-size: 22px;
+    /* Keep moderately larger font size */
+    font-weight: bold;
+    color: #000 !important;
+    /* Force black text with !important */
+    text-align: center;
+}
+
+.days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    font-weight: bold;
+    font-size: 16px;
+    /* Slightly larger day headers */
+    color: #000;
+}
+
+.dates {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    /* Moderate spacing between dates */
+}
+
+.date {
+    padding: 15px;
+    /* Moderately larger date boxes */
+    font-size: 16px;
+    /* Slightly larger font size for dates */
+    background: #eae8fc;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #000;
+}
+
+.date:hover {
+    background: #b5aefc;
+}
+
+.date.selected {
+    background: #7b6ef6;
+    color: white;
+}
+
+.actions {
+    margin-top: 30px;
+}
+
+.actions button {
+    font-size: 18px;
+    padding: 12px 25px;
+    /* Moderately larger buttons */
+    margin: 0 15px;
+}
