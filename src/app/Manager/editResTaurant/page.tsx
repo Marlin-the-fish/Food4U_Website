@@ -8,7 +8,7 @@ export default function UpdateRestaurant() {
   const [address, setAddress] = useState('');
   const [openHour, setOpenHour] = useState<number | string>(0);
   const [closeHour, setCloseHour] = useState<number | string>(0);
-  const [closedDates, setClosedDates] = useState([]);
+  const [closeDates, setcloseDates] = useState([]);
   const [tables, setTables] = useState([]);
   const [numTables, setNumTables] = useState('');
   const [tablesToDelete, setTablesToDelete] = useState([]);
@@ -49,7 +49,7 @@ export default function UpdateRestaurant() {
         setAddress(restaurant.address || '');
         setOpenHour(restaurant.openHour || '');
         setCloseHour(restaurant.closeHour || '');
-        setClosedDates(closedDates || []);
+        setcloseDates(closeDates || []);
         setTables(tables.map((table) => ({
           idTable: table.idTable,
           name: `Table ${table.tableNumber}`,
@@ -82,7 +82,7 @@ export default function UpdateRestaurant() {
         address,
         openHour,
         closeHour,
-        closedDates,
+        closeDates,
         tables,
       };
 
@@ -94,6 +94,8 @@ export default function UpdateRestaurant() {
         payload,
         { headers: { 'Content-Type': 'application/json' } }
       );
+
+      console.log("Response from backend:", response);
 
       if (response.status === 200) {
         setMessage(response.data.message || 'Restaurant updated successfully.');
@@ -107,6 +109,11 @@ export default function UpdateRestaurant() {
       console.error(error);
       setMessage('An error occurred. Please try again.');
     }
+  };
+
+  const handleAddClosedDate = () => {
+    // Add a blank closed date (default)
+    setcloseDates((prev) => [...prev, '']);
   };
 
   const handleNumTablesChange = (e) => {
@@ -243,13 +250,13 @@ export default function UpdateRestaurant() {
 
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Closed Dates</label>
-          {closedDates.map((date, index) => (
+          {closeDates.map((date, index) => (
             <div key={index} className="flex items-center mb-2">
               <input
                 type="date"
                 value={date}
                 onChange={(e) =>
-                  setClosedDates((prev) =>
+                  setcloseDates((prev) =>
                     prev.map((d, i) => (i === index ? e.target.value : d))
                   )
                 }
@@ -257,7 +264,7 @@ export default function UpdateRestaurant() {
               />
               <button
                 type="button"
-                onClick={() => setClosedDates((prev) => prev.filter((_, i) => i !== index))}
+                onClick={() => setcloseDates((prev) => prev.filter((_, i) => i !== index))}
                 className="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-600 focus:outline-none focus:shadow-outline"
               >
                 Delete
@@ -266,7 +273,7 @@ export default function UpdateRestaurant() {
           ))}
           <button
             type="button"
-            onClick={() => setClosedDates((prev) => [...prev, ''])}
+            onClick={handleAddClosedDate}
             className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-600 focus:outline-none focus:shadow-outline"
           >
             Add Closed Date
