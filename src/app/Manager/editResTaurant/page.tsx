@@ -6,10 +6,9 @@ import { useRouter } from 'next/navigation';
 export default function UpdateRestaurant() {
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-  const [openHour, setOpenHour] = useState(0);
-  const [closeHour, setCloseHour] = useState(0);
-  const [openDate, setOpenDate] = useState('');
-  const [closeDate, setCloseDate] = useState('');
+  const [openHour, setOpenHour] = useState<number | string>(0);
+  const [closeHour, setCloseHour] = useState<number | string>(0);
+  const [closeDates, setcloseDates] = useState([]);
   const [tables, setTables] = useState([]);
   const [numTables, setNumTables] = useState('');
   const [tablesToDelete, setTablesToDelete] = useState([]);
@@ -44,14 +43,13 @@ export default function UpdateRestaurant() {
           ? JSON.parse(response.data.body)
           : response.data.body;
 
-        const { restaurant, tables } = responseBody;
+        const { restaurant, tables, closeDates } = responseBody;
 
         setName(restaurant.name || '');
         setAddress(restaurant.address || '');
         setOpenHour(restaurant.openHour || '');
         setCloseHour(restaurant.closeHour || '');
-        setOpenDate(restaurant.openDate ? restaurant.openDate.slice(0, 10) : '');
-        setCloseDate(restaurant.closeDate ? restaurant.closeDate.slice(0, 10) : '');
+        setcloseDates(closeDates || []);
         setTables(tables.map((table) => ({
           idTable: table.idTable,
           name: `Table ${table.tableNumber}`,
@@ -84,16 +82,20 @@ export default function UpdateRestaurant() {
         address,
         openHour,
         closeHour,
-        openDate,
-        closeDate,
+        closeDates,
         tables,
       };
+
+      // Debugging: Log the payload before sending it
+      console.log("Payload being sent to the backend:", payload);
 
       const response = await axios.post(
         'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/editRestaurant',
         payload,
         { headers: { 'Content-Type': 'application/json' } }
       );
+
+      console.log("Response from backend:", response);
 
       if (response.status === 200) {
         setMessage(response.data.message || 'Restaurant updated successfully.');
@@ -107,6 +109,11 @@ export default function UpdateRestaurant() {
       console.error(error);
       setMessage('An error occurred. Please try again.');
     }
+  };
+
+  const handleAddClosedDate = () => {
+    // Add a blank closed date (default)
+    setcloseDates((prev) => [...prev, '']);
   };
 
   const handleNumTablesChange = (e) => {
@@ -217,7 +224,7 @@ export default function UpdateRestaurant() {
             max="23"
             placeholder="Enter opening hour (e.g., 9 for 9 AM or 19 for 7 PM)"
             value={openHour}
-            onChange={(e) => setOpenHour(parseInt(e.target.value, 10))}
+            onChange={(e) => setOpenHour(e.target.value === '' ? '' : parseInt(e.target.value, 10))} // Allow empty string
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
@@ -233,35 +240,44 @@ export default function UpdateRestaurant() {
             max="23"
             placeholder="Enter closing hour (e.g., 21 for 9 PM)"
             value={closeHour}
-            onChange={(e) => setCloseHour(parseInt(e.target.value, 10))}
+            onChange={(e) => {
+              const value = e.target.value === '' ? 0 : parseInt(e.target.value, 10); // Default to 0 if empty
+              setCloseHour(value);
+            }}
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="openDate">
-            Open Date
-          </label>
-          <input
-            id="openDate"
-            type="date"
-            value={openDate}
-            onChange={(e) => setOpenDate(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="closeDate">
-            Close Date
-          </label>
-          <input
-            id="closeDate"
-            type="date"
-            value={closeDate}
-            onChange={(e) => setCloseDate(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
+          <label className="block text-gray-700 text-sm font-bold mb-2">Closed Dates</label>
+          {closeDates.map((date, index) => (
+            <div key={index} className="flex items-center mb-2">
+              <input
+                type="date"
+                value={date}
+                onChange={(e) =>
+                  setcloseDates((prev) =>
+                    prev.map((d, i) => (i === index ? e.target.value : d))
+                  )
+                }
+                className="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-4"
+              />
+              <button
+                type="button"
+                onClick={() => setcloseDates((prev) => prev.filter((_, i) => i !== index))}
+                className="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-600 focus:outline-none focus:shadow-outline"
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={handleAddClosedDate}
+            className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-600 focus:outline-none focus:shadow-outline"
+          >
+            Add Closed Date
+          </button>
         </div>
 
         <div className="mb-4">
