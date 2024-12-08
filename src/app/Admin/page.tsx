@@ -1,22 +1,22 @@
 'use client'
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
+import { useRouter } from 'next/navigation'
 
 const instance = axios.create({
     baseURL: 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial'
-});
+})
 
 export default function AdminPage() {
-    const [restaurants, setRestaurants] = useState([]);
-    const [selectedRestaurant, setSelectedRestaurant] = useState('');
-    const [statusMessage, setStatusMessage] = useState('');
-    const router = useRouter();
+    const [restaurants, setRestaurants] = useState([])
+    const [selectedRestaurant, setSelectedRestaurant] = useState('')
+    const [statusMessage, setStatusMessage] = useState('')
+    const router = useRouter()
 
     // Handle input change for selected restaurant
     const handleRestaurantChange = (e) => {
-        setSelectedRestaurant(e.target.value);
-    };
+        setSelectedRestaurant(e.target.value)
+    }
 
     // Fetch Restaurants function
     const fetchRestaurants = async () => {
@@ -24,18 +24,18 @@ export default function AdminPage() {
             const response = await instance.post('/listAllRestaurants', {
                 username: sessionStorage.getItem('username').toString(),
                 password: sessionStorage.getItem('password').toString()
-            });
+            })
             if (response.status == 200) {
                 // Update to match the structure of the returned data
-                setRestaurants(response.data.restaurants);
+                setRestaurants(response.data.restaurants)
             } else {
-                router.push('/Authorization');
-                setRestaurants([]); // Clear if no data is found or credentials are incorrect
+                router.push('/Authorization')
+                setRestaurants([]) // Clear if no data is found or credentials are incorrect
             }
         } catch (error) {
-            console.error('Error fetching restaurants:', error);
+            console.error('Error fetching restaurants:', error)
         }
-    };
+    }
 
     // Handle Delete Restaurant
     const handleDeleteRestaurant = async () => {
@@ -44,38 +44,18 @@ export default function AdminPage() {
                 username: sessionStorage.getItem('username').toString(),
                 password: sessionStorage.getItem('password').toString(),
                 restaurantID: selectedRestaurant
-            });
+            })
             if (response.data.isDeleted) {
-                setStatusMessage('Restaurant deleted successfully.');
-                fetchRestaurants(); // Refresh the list
-                setSelectedRestaurant(''); // Hide buttons
+                setStatusMessage('Restaurant deleted successfully.')
+                fetchRestaurants() // Refresh the list
+                setSelectedRestaurant('') // Hide buttons
             } else {
-                setStatusMessage('Failed to delete restaurant.');
+                setStatusMessage('Failed to delete restaurant.')
             }
         } catch (error) {
-            setStatusMessage('An error occurred. Please try again later.');
+            setStatusMessage('An error occurred. Please try again later.')
         }
-    };
-
-    // Handle Generate Report
-    const handleGenerateReport = async () => {
-        try {
-            if (selectedRestaurant) {
-                const response = await instance.post('/generateReport', {
-                    username: sessionStorage.getItem('username').toString(),
-                    password: sessionStorage.getItem('password').toString(),
-                    restaurant: selectedRestaurant
-                });
-                if (response.data.success) {
-                    setStatusMessage('Report generated successfully.');
-                } else {
-                    setStatusMessage('Failed to generate report.');
-                }
-            }
-        } catch (error) {
-            setStatusMessage('An error occurred. Please try again later.');
-        }
-    };
+    }
 
     // Handle View Reservations
     const handleViewReservations = async () => {
@@ -85,40 +65,40 @@ export default function AdminPage() {
                     username: sessionStorage.getItem('username').toString(),
                     password: sessionStorage.getItem('password').toString(),
                     restaurant: selectedRestaurant
-                });
+                })
                 if (response.data.success) {
-                    setStatusMessage('Reservations viewed successfully.');
+                    setStatusMessage('Reservations viewed successfully.')
                     // Logic to handle displaying reservations can be added here
                 } else {
-                    setStatusMessage('Failed to view reservations.');
+                    setStatusMessage('Failed to view reservations.')
                 }
             }
         } catch (error) {
-            setStatusMessage('An error occurred. Please try again later.');
+            setStatusMessage('An error occurred. Please try again later.')
         }
-    };
+    }
 
     // Handle Refresh Restaurants
     const handleRefreshRestaurants = async () => {
-        setSelectedRestaurant(''); // Hide buttons
-        setStatusMessage(''); // Clear status message
-        fetchRestaurants(); // Fetch restaurants again
-    };
+        setSelectedRestaurant('') // Hide buttons
+        setStatusMessage('') // Clear status message
+        fetchRestaurants() // Fetch restaurants again
+    }
 
     // Use effect to handle authorization and fetching data
     useEffect(() => {
         // Get the username and password from session storage
-        const username = sessionStorage.getItem('username');
-        const password = sessionStorage.getItem('password');
+        const username = sessionStorage.getItem('username')
+        const password = sessionStorage.getItem('password')
 
         if (!username || !password) {
             // If no credentials, redirect to Authorization page
-            router.push('/Authorization');
+            router.push('/Authorization')
         } else {
             // Fetch list of restaurants
-            fetchRestaurants();
+            fetchRestaurants()
         }
-    }, [router, fetchRestaurants]);
+    }, [router, fetchRestaurants])
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100">
@@ -158,12 +138,6 @@ export default function AdminPage() {
                             Delete Restaurant
                         </button>
                         <button
-                            onClick={handleGenerateReport}
-                            className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-200"
-                        >
-                            Generate Report
-                        </button>
-                        <button
                             onClick={handleViewReservations}
                             className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
                         >
@@ -189,5 +163,5 @@ export default function AdminPage() {
                 </div>
             </div>
         </main>
-    );
+    )
 }
