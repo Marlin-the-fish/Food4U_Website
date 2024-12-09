@@ -8,10 +8,11 @@ export default function UpdateRestaurant() {
   const [address, setAddress] = useState('');
   const [openHour, setOpenHour] = useState<number | string>(0);
   const [closeHour, setCloseHour] = useState<number | string>(0);
-  const [closeDates, setcloseDates] = useState([]);
+  const [closeDates, setCloseDates] = useState([]); // Contains all close dates
+  const [newCloseDates, setNewCloseDates] = useState([]);
   const [tables, setTables] = useState([]);
   const [numTables, setNumTables] = useState('');
-  const [tablesToDelete, setTablesToDelete] = useState([]);
+  const [hasExistingTables, setHasExistingTables] = useState(false);
   const [message, setMessage] = useState('');
   const router = useRouter();
 
@@ -49,13 +50,15 @@ export default function UpdateRestaurant() {
         setAddress(restaurant.address || '');
         setOpenHour(restaurant.openHour || '');
         setCloseHour(restaurant.closeHour || '');
-        setcloseDates(closeDates || []);
+        setCloseDates(closeDates || []); // Set existing close dates
+        setNewCloseDates([]);
         setTables(tables.map((table) => ({
           idTable: table.idTable,
           name: `Table ${table.tableNumber}`,
           seats: table.numOfSeats,
         })));
         setNumTables(tables.length.toString());
+        setHasExistingTables(tables.length > 0);
       } catch (error) {
         console.error('Error fetching restaurant details:', error.response?.data || error.message);
         setMessage('Failed to fetch restaurant details.');
@@ -82,7 +85,7 @@ export default function UpdateRestaurant() {
         address,
         openHour,
         closeHour,
-        closeDates,
+        closeDates: [...closeDates, ...newCloseDates],
         tables,
       };
 
@@ -112,8 +115,45 @@ export default function UpdateRestaurant() {
   };
 
   const handleAddClosedDate = () => {
-    // Add a blank closed date (default)
-    setcloseDates((prev) => [...prev, '']);
+    setNewCloseDates((prev) => [...prev, '']); // Add a new editable close date
+  };
+
+  const handleNewCloseDateChange = (index, value) => {
+    setNewCloseDates((prev) =>
+      prev.map((date, i) => (i === index ? value : date))
+    );
+  };
+
+  const handleDeleteClosedDate = async (index, isNew) => {
+    const { username, password } = getCredentials();
+
+    if (isNew) {
+      // Remove from new close dates (not yet saved in the database)
+      setNewCloseDates((prev) => prev.filter((_, i) => i !== index));
+    } else {
+      // Existing close dates: Delete from the database and frontend
+      const dateToDelete = closeDates[index];
+
+      try {
+        const response = await axios.post(
+          'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/deleteCloseDate',
+          { username, password, closeDate: dateToDelete },
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+
+        if (response.status === 200) {
+          console.log(`Close date ${dateToDelete} deleted successfully.`);
+          // Remove from the state after successful deletion
+          setCloseDates((prev) => prev.filter((_, i) => i !== index));
+        } else {
+          console.error('Failed to delete close date:', response.data);
+          setMessage('Failed to delete close date.');
+        }
+      } catch (error) {
+        console.error('Error deleting close date:', error.response?.data || error.message);
+        setMessage('An error occurred. Please try again.');
+      }
+    }
   };
 
   const handleNumTablesChange = (e) => {
@@ -162,8 +202,17 @@ export default function UpdateRestaurant() {
       }
     }
 
-    // Remove the table from the frontend state
-    setTables((prev) => prev.filter((_, i) => i !== index));
+    // Remove the table from the frontend state and recalculate table numbers
+    setTables((prev) =>
+      prev
+        .filter((_, i) => i !== index) // Remove the deleted table
+        .map((table, i) => ({
+          ...table,
+          name: `Table ${i + 1}`, // Recalculate table numbers
+        }))
+    );
+
+    // Update the number of tables
     setNumTables((prev) => (parseInt(prev, 10) - 1).toString());
   };
 
@@ -251,33 +300,50 @@ export default function UpdateRestaurant() {
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Closed Dates</label>
           {closeDates.map((date, index) => (
-            <div key={index} className="flex items-center mb-2">
+            <div key={`existing-${index}`} className="flex items-center mb-2">
               <input
                 type="date"
                 value={date}
-                onChange={(e) =>
-                  setcloseDates((prev) =>
-                    prev.map((d, i) => (i === index ? e.target.value : d))
-                  )
-                }
-                className="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-4"
+                readOnly // Existing close dates cannot be edited
+                className="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-4 bg-gray-200"
               />
               <button
                 type="button"
-                onClick={() => setcloseDates((prev) => prev.filter((_, i) => i !== index))}
+                onClick={() => handleDeleteClosedDate(index, false)}
                 className="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-600 focus:outline-none focus:shadow-outline"
               >
                 Delete
               </button>
             </div>
           ))}
-          <button
-            type="button"
-            onClick={handleAddClosedDate}
-            className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-600 focus:outline-none focus:shadow-outline"
-          >
-            Add Closed Date
-          </button>
+
+          {newCloseDates.map((date, index) => (
+            <div key={`new-${index}`} className="flex items-center mb-2">
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => handleNewCloseDateChange(index, e.target.value)}
+                className="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-4"
+              />
+              <button
+                type="button"
+                onClick={() => handleDeleteClosedDate(index, true)}
+                className="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-600 focus:outline-none focus:shadow-outline"
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+
+          <div className="mt-4"> {/* Add top margin here */}
+            <button
+              type="button"
+              onClick={handleAddClosedDate}
+              className="bg-green-500 text-white font-bold py-2 px-4 rounded hover:bg-green-600 focus:outline-none focus:shadow-outline"
+            >
+              Add Date
+            </button>
+          </div>
         </div>
 
         <div className="mb-4">
@@ -291,9 +357,16 @@ export default function UpdateRestaurant() {
             placeholder="Enter number of tables"
             value={numTables}
             onChange={handleNumTablesChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            disabled={hasExistingTables} // Disable only if there are existing tables in the database
+            className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${hasExistingTables ? 'bg-gray-200 cursor-not-allowed' : ''
+              }`}
           />
-        </div>
+          {hasExistingTables && (
+            <p className="text-sm text-gray-500 mt-1">
+              You cannot edit this field while there are existing tables. Delete all tables to edit this field.
+            </p>
+          )}
+        </div>;
 
         {tables.map((table, index) => (
           <div className="mb-4 flex items-center" key={index}>
