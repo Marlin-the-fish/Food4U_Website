@@ -1,16 +1,18 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import "./Calendar.css";
 
 const LAMBDA_URL = "https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/omitClosedDate";
 
 const Calendar: React.FC = () => {
   const today = new Date();
+  const router = useRouter(); // Initialize the router
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [closedDates, setClosedDates] = useState<string[]>([]); // Closed dates in ISO 8601 format
+  const [closedDates, setClosedDates] = useState<string[] | null>(null); // Nullable closedDates
 
   const monthNames = [
     "January",
@@ -39,10 +41,10 @@ const Calendar: React.FC = () => {
       try {
         const response = await axios.post(LAMBDA_URL, { idRestaurant });
         const parsedResponse = JSON.parse(response.data.body); // Parse the response body
-        setClosedDates(parsedResponse.closedDates.map((date: string) => date.split("T")[0])); // Store as YYYY-MM-DD
+        setClosedDates(parsedResponse.closedDates?.map((date: string) => date.split("T")[0]) || null); // Handle missing closedDates
       } catch (error) {
-        console.error("Error fetching closed dates:", error);
-        alert("An error occurred while fetching closed dates.");
+        console.error("No Closed Date:", error);
+        setClosedDates(null); // Fallback to no closedDates
       }
     };
 
@@ -61,7 +63,7 @@ const Calendar: React.FC = () => {
 
     for (let date = 1; date <= lastDate; date++) {
       const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(date).padStart(2, "0")}`;
-      const isDisabled = closedDates.includes(dateString);
+      const isDisabled = closedDates?.includes(dateString) || false; // Check if date is closed
 
       days.push(
         <div
@@ -94,7 +96,8 @@ const Calendar: React.FC = () => {
 
   const confirmDate = () => {
     if (selectedDate) {
-      alert(`You selected ${selectedDate}`);
+      sessionStorage.setItem("date", selectedDate); // Store selected date in sessionStorage
+      router.push("/User/chooseHour"); // Navigate to the next page
     } else {
       alert("Please select a date!");
     }
@@ -122,7 +125,7 @@ const Calendar: React.FC = () => {
         <div className="dates">{generateCalendar()}</div>
       </div>
       <div className="actions">
-        <button onClick={() => alert("Going back!")}>Back</button>
+        <button onClick={() => router.back()}>Back</button>
         <button onClick={confirmDate}>Confirm</button>
       </div>
     </div>

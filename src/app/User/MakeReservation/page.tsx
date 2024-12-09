@@ -28,6 +28,7 @@ export default function UserLogin() {
     // Save name and email to session storage
     sessionStorage.setItem('name', name);
     sessionStorage.setItem('email', email);
+    
 
     // Log saved data to the console
     console.log('Saved to session storage:');
@@ -47,7 +48,9 @@ export default function UserLogin() {
 
         // Store idUser in session storage
         sessionStorage.setItem('idUser', idUser);
+        sessionStorage.setItem('email', email); // Ensure email is also stored
         console.log('Generated idUser:', idUser);
+        console.log('Stored email:', email);
 
         // Redirect to chooseDate page
         router.push('/User/ListActiveRestaurant');
