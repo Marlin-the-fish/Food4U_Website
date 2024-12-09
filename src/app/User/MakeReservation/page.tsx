@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'; // Import useRouter for navigation
 // Lambda function URL
 const LAMBDA_URL = 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/createUser';
 
-export default function Authorization() {
+export default function UserLogin() {
   const [formData, setFormData] = useState({ name: '', email: '' });
   const router = useRouter(); // Initialize the router
 
@@ -24,6 +24,15 @@ export default function Authorization() {
       alert('Please provide a valid name and email');
       return;
     }
+
+    // Save name and email to session storage
+    sessionStorage.setItem('name', name);
+    sessionStorage.setItem('email', email);
+
+    // Log saved data to the console
+    console.log('Saved to session storage:');
+    console.log('Name:', sessionStorage.getItem('name'));
+    console.log('Email:', sessionStorage.getItem('email'));
 
     try {
       // Send POST request to Lambda function using Axios

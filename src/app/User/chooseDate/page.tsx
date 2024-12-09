@@ -1,12 +1,16 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import "./Calendar.css";
+
+const LAMBDA_URL = "https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/omitClosedDate";
 
 const Calendar: React.FC = () => {
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [closedDates, setClosedDates] = useState<string[]>([]); // Closed dates in ISO 8601 format
 
   const monthNames = [
     "January",
@@ -23,28 +27,52 @@ const Calendar: React.FC = () => {
     "December",
   ];
 
+  useEffect(() => {
+    const idRestaurant = sessionStorage.getItem("idRestaurant");
+
+    if (!idRestaurant) {
+      alert("Restaurant ID not found. Please log in again.");
+      return;
+    }
+
+    const fetchClosedDates = async () => {
+      try {
+        const response = await axios.post(LAMBDA_URL, { idRestaurant });
+        const parsedResponse = JSON.parse(response.data.body); // Parse the response body
+        setClosedDates(parsedResponse.closedDates.map((date: string) => date.split("T")[0])); // Store as YYYY-MM-DD
+      } catch (error) {
+        console.error("Error fetching closed dates:", error);
+        alert("An error occurred while fetching closed dates.");
+      }
+    };
+
+    fetchClosedDates();
+  }, []);
+
   const generateCalendar = () => {
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     const lastDate = new Date(currentYear, currentMonth + 1, 0).getDate();
     const startDay = firstDay === 0 ? 6 : firstDay - 1; // Adjust for Monday start
     const days: JSX.Element[] = [];
 
-    // Empty slots before the first date
     for (let i = 0; i < startDay; i++) {
       days.push(<div key={`empty-${i}`} className="empty"></div>);
     }
 
-    // Dates of the month
     for (let date = 1; date <= lastDate; date++) {
       const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(date).padStart(2, "0")}`;
+      const isDisabled = closedDates.includes(dateString);
 
       days.push(
         <div
           key={`date-${date}`}
-          className={`date ${selectedDate === dateString ? "selected" : ""}`}
+          className={`date ${isDisabled ? "disabled" : selectedDate === dateString ? "selected" : ""}`}
           onClick={() => {
-            setSelectedDate(dateString);
+            if (!isDisabled) {
+              setSelectedDate(dateString);
+            }
           }}
+          title={isDisabled ? "This date is unavailable." : ""}
         >
           {date}
         </div>
