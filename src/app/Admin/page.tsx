@@ -39,7 +39,7 @@ export default function AdminPage() {
             if (response.status == 200) {
                 setRestaurants(response.data.restaurants)
             } else {
-                router.push('/Authorization')
+                router.push('/Log_in')
             }
         } catch (error) {
             console.error('Error fetching restaurants:', error)
