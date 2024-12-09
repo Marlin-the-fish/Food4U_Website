@@ -4,7 +4,7 @@ import axios from 'axios'
 import { useRouter } from 'next/navigation'
 
 const instance = axios.create({
-    baseURL: 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial' // Replace with your API base URL
+    baseURL: 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial'
 })
 
 export default function AdminPage() {
@@ -13,6 +13,7 @@ export default function AdminPage() {
     const [reservations, setReservations] = useState([])
     const [selectedReservation, setSelectedReservation] = useState('')
     const [statusMessage, setStatusMessage] = useState('')
+    const [viewReservationsClicked, setViewReservationsClicked] = useState(false)
     const router = useRouter()
 
     // Handle input change for selected restaurant
@@ -20,6 +21,8 @@ export default function AdminPage() {
         setSelectedRestaurant(e.target.value)
         setReservations([]) // Clear reservations when changing restaurant
         setSelectedReservation('') // Reset reservation selection
+        setViewReservationsClicked(false) // Reset view reservations button
+        setStatusMessage('') // Clear any existing messages
     }
 
     const handleReservationChange = (e) => {
@@ -36,7 +39,7 @@ export default function AdminPage() {
             if (response.status == 200) {
                 setRestaurants(response.data.restaurants)
             } else {
-                router.push('/Log_in')
+                router.push('/Authorization')
             }
         } catch (error) {
             console.error('Error fetching restaurants:', error)
@@ -54,7 +57,12 @@ export default function AdminPage() {
                 })
                 if (response.status == 200) {
                     setReservations(response.data.reservations)
-                    setStatusMessage('Reservations retrieved successfully.')
+                    setViewReservationsClicked(true) // Hide button after clicking
+                    if (response.data.reservations.length == 0) {
+                        setStatusMessage('No reservations found for this restaurant.')
+                    } else {
+                        setStatusMessage('Reservations retrieved successfully.')
+                    }
                 } else {
                     setStatusMessage('Failed to retrieve reservations.')
                 }
@@ -93,6 +101,7 @@ export default function AdminPage() {
         setSelectedRestaurant('')
         setReservations([])
         setSelectedReservation('')
+        setViewReservationsClicked(false)
         setStatusMessage('')
         fetchRestaurants()
     }
@@ -169,12 +178,14 @@ export default function AdminPage() {
                         >
                             Delete Restaurant
                         </button>
-                        <button
-                            onClick={handleViewReservations}
-                            className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
-                        >
-                            View Reservations
-                        </button>
+                        {!viewReservationsClicked && (
+                            <button
+                                onClick={handleViewReservations}
+                                className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
+                            >
+                                View Reservations
+                            </button>
+                        )}
                         {reservations.length > 0 && (
                             <>
                                 <label htmlFor="reservations" className="block text-sm font-medium text-gray-700 mb-1">
