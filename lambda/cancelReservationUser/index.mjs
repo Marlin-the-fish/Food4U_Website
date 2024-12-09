@@ -74,6 +74,7 @@ export const handler = async (event) => {
         response = {
             statusCode: 400,
             confirmationCode: event.confirmation,
+            userID: event.userID,
             error: "Reservation not found or user does not have permission to delete this reservation."
         };
     }
