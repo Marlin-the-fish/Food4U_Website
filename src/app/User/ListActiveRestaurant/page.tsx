@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useRouter } from 'next/navigation'; // Import useRouter for navigation
 
 const instance = axios.create({
   baseURL: 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial',
@@ -12,8 +13,17 @@ export default function ListActiveRestaurant() {
   const [selectedRestaurant, setSelectedRestaurant] = useState('');
   const [selectedRestaurantName, setSelectedRestaurantName] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
-  const [filterDate, setFilterDate] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [numberOfSeats, setNumberOfSeats] = useState('');
+  const router = useRouter(); // Initialize the router
+
+  // Initialize numberOfSeats from sessionStorage
+  useEffect(() => {
+    const storedSeats = sessionStorage.getItem('numberOfSeats');
+    if (storedSeats) {
+      setNumberOfSeats(storedSeats);
+    }
+  }, []);
 
   // Fetch Active Restaurants
   const fetchActiveRestaurants = async () => {
@@ -36,34 +46,45 @@ export default function ListActiveRestaurant() {
     const selectedId = e.target.value;
     setSelectedRestaurant(selectedId);
     const selected = restaurants.find((restaurant) => restaurant.idRestaurant === selectedId);
-    setSelectedRestaurantName(selected ? selected.name : '');
-  };
-
-  // Handle Date Filter
-  const handleDateFilter = (e) => {
-    const selectedDate = new Date(e.target.value);
-    setFilterDate(e.target.value);
-    filterRestaurants(searchQuery, e.target.value);
+    if (selected) {
+      setSelectedRestaurantName(selected.name);
+      sessionStorage.setItem('idRestaurant', selectedId); // Store idRestaurant in session storage
+    } else {
+      sessionStorage.removeItem('idRestaurant');
+    }
   };
 
   // Handle Name Search
   const handleSearchQueryChange = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
-    filterRestaurants(query, filterDate);
+    filterRestaurants(query);
   };
 
   // Filter Restaurants
-  const filterRestaurants = (query, date) => {
-    const selectedDate = date ? new Date(date) : null;
-    const filtered = restaurants.filter((restaurant) => {
-      const matchesName = restaurant.name.toLowerCase().includes(query);
-      const matchesDate = selectedDate
-        ? new Date(restaurant.openDate) <= selectedDate && new Date(restaurant.closeDate) >= selectedDate
-        : true;
-      return matchesName && matchesDate;
-    });
+  const filterRestaurants = (query) => {
+    const filtered = restaurants.filter((restaurant) =>
+      restaurant.name.toLowerCase().includes(query)
+    );
     setFilteredRestaurants(filtered);
+  };
+
+  // Handle Number of Seats Change
+  const handleSeatsChange = (e) => {
+    const seats = e.target.value;
+    setNumberOfSeats(seats);
+    sessionStorage.setItem('numberOfSeats', seats);
+  };
+
+  // Handle Confirm Button Click
+  const handleConfirm = () => {
+    if (!selectedRestaurant || !numberOfSeats) {
+      alert('Please select a restaurant and enter the number of seats.');
+      return;
+    }
+
+    // Navigate to the Choose Date page
+    router.push('/User/chooseDate');
   };
 
   // Handle Refresh Restaurants
@@ -71,8 +92,10 @@ export default function ListActiveRestaurant() {
     setSelectedRestaurant('');
     setSelectedRestaurantName('');
     setStatusMessage('');
-    setFilterDate('');
     setSearchQuery('');
+    setNumberOfSeats('');
+    sessionStorage.removeItem('numberOfSeats');
+    sessionStorage.removeItem('idRestaurant');
     fetchActiveRestaurants();
   };
 
@@ -99,14 +122,15 @@ export default function ListActiveRestaurant() {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-black mb-1" htmlFor="filterDate">
-            Filter by Date
+          <label className="block text-sm font-medium text-black mb-1" htmlFor="numberOfSeats">
+            Number of Seats
           </label>
           <input
-            type="date"
-            id="filterDate"
-            value={filterDate}
-            onChange={handleDateFilter}
+            type="number"
+            id="numberOfSeats"
+            value={numberOfSeats}
+            onChange={handleSeatsChange}
+            placeholder="Enter number of seats"
             className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black"
           />
         </div>
@@ -135,9 +159,15 @@ export default function ListActiveRestaurant() {
         <div className="flex flex-col mt-6">
           <button
             onClick={handleRefreshRestaurants}
-            className="bg-yellow-500 text-black py-2 px-4 rounded-md hover:bg-yellow-600 transition duration-200"
+            className="bg-yellow-500 text-black py-2 px-4 rounded-md hover:bg-yellow-600 transition duration-200 mb-4"
           >
             Refresh Restaurants
+          </button>
+          <button
+            onClick={handleConfirm}
+            className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
+          >
+            Confirm
           </button>
         </div>
 
@@ -146,6 +176,11 @@ export default function ListActiveRestaurant() {
             <p className="text-sm text-black">
               Selected Restaurant: <strong>{selectedRestaurantName}</strong>
             </p>
+            {numberOfSeats && (
+              <p className="text-sm text-black">
+                Number of Seats: <strong>{numberOfSeats}</strong>
+              </p>
+            )}
           </div>
         )}
 

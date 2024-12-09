@@ -1,0 +1,188 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f3e9fc;
+    /* Light purple background */
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+.calendar-container {
+    max-width: 500px;
+    margin: 40px auto;
+    /* Reduced margin to move it up */
+    padding: 10px;
+    background: #f3e9fc;
+    /* Light purple background */
+    border-radius: 15px;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    position: relative;
+    /* Allows fine-tuning with transform */
+    top: -20px;
+    /* Moves the container upward */
+}
+
+/* Additional Calendar Container for alternate design */
+.calendar-container.alt {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    font-size: 30px;
+    /* Slightly larger title */
+    color: #000;
+    /* Black text */
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 18px;
+    /* Slightly larger subtitle */
+    color: #000;
+    /* Black text */
+    margin-bottom: 25px;
+}
+
+.calendar h1 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.calendar p {
+    text-align: center;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.calendar {
+    margin-top: 15px;
+}
+
+.month-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 0 20px;
+}
+
+/* Alternate Month Navigation */
+.month-nav.alt {
+    margin-bottom: 10px;
+}
+
+button {
+    padding: 8px 15px;
+    font-size: 16px;
+    background-color: #7b6ef6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #5a4dcf;
+}
+
+.monthYear {
+    font-size: 22px;
+    /* Keep moderately larger font size */
+    font-weight: bold;
+    color: #000 !important;
+    /* Force black text with !important */
+    text-align: center;
+}
+
+.days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    font-weight: bold;
+    font-size: 16px;
+    /* Slightly larger day headers */
+    color: #000;
+}
+
+/* Alternate Days */
+.days.alt {
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: bold;
+}
+
+.dates {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    /* Moderate spacing between dates */
+}
+
+.date {
+    padding: 15px;
+    /* Moderately larger date boxes */
+    font-size: 16px;
+    /* Slightly larger font size for dates */
+    background: #eae8fc;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #000;
+    text-align: center;
+    margin: 5px;
+    transition: background-color 0.3s;
+}
+
+.date:hover {
+    background: #b5aefc;
+}
+
+/* Alternate Date */
+.date.alt {
+    user-select: none;
+    border-radius: 4px;
+}
+
+.date.selected {
+    background: #7b6ef6;
+    color: white;
+}
+
+/* Alternate Selected Date */
+.date.selected.alt {
+    color: #fff;
+    background-color: #007bff;
+    border-radius: 50%;
+}
+
+.date.disabled {
+    color: #bababa;
+    pointer-events: none;
+    cursor: not-allowed;
+    background-color: #7b7b7b;
+}
+
+.date:hover.disabled {
+    background-color: #f5f5f5;
+    /* Prevent hover effects on disabled dates */
+}
+
+.empty {
+    background-color: transparent;
+}
+
+.actions {
+    margin-top: 30px;
+}
+
+.actions button {
+    font-size: 18px;
+    padding: 12px 25px;
+    /* Moderately larger buttons */
+    margin: 0 15px;
+}
