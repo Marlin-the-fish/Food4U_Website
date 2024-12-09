@@ -36,7 +36,7 @@ export default function AdminPage() {
             if (response.status == 200) {
                 setRestaurants(response.data.restaurants)
             } else {
-                router.push('/Authorization')
+                router.push('/Log_in')
             }
         } catch (error) {
             console.error('Error fetching restaurants:', error)
@@ -124,8 +124,8 @@ export default function AdminPage() {
         const password = sessionStorage.getItem('password')
 
         if (!username || !password) {
-            // If no credentials, redirect to Authorization page
-            router.push('/Authorization')
+            // If no credentials, redirect to log in page
+            router.push('/Log_in')
         } else {
             // Fetch list of restaurants
             fetchRestaurants()
