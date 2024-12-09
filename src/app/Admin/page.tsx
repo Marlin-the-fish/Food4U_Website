@@ -10,12 +10,23 @@ const instance = axios.create({
 export default function AdminPage() {
     const [restaurants, setRestaurants] = useState([])
     const [selectedRestaurant, setSelectedRestaurant] = useState('')
+    const [reservations, setReservations] = useState([])
+    const [selectedReservation, setSelectedReservation] = useState('')
     const [statusMessage, setStatusMessage] = useState('')
+    const [viewReservationsClicked, setViewReservationsClicked] = useState(false)
     const router = useRouter()
 
     // Handle input change for selected restaurant
     const handleRestaurantChange = (e) => {
         setSelectedRestaurant(e.target.value)
+        setReservations([]) // Clear reservations when changing restaurant
+        setSelectedReservation('') // Reset reservation selection
+        setViewReservationsClicked(false) // Reset view reservations button
+        setStatusMessage('') // Clear any existing messages
+    }
+
+    const handleReservationChange = (e) => {
+        setSelectedReservation(e.target.value)
     }
 
     // Fetch Restaurants function
@@ -26,34 +37,12 @@ export default function AdminPage() {
                 password: sessionStorage.getItem('password').toString()
             })
             if (response.status == 200) {
-                // Update to match the structure of the returned data
                 setRestaurants(response.data.restaurants)
             } else {
-                router.push('/Authorization')
-                setRestaurants([]) // Clear if no data is found or credentials are incorrect
+                router.push('/Log_in')
             }
         } catch (error) {
             console.error('Error fetching restaurants:', error)
-        }
-    }
-
-    // Handle Delete Restaurant
-    const handleDeleteRestaurant = async () => {
-        try {
-            const response = await instance.post('/deleteRestaurantAdmin', {
-                username: sessionStorage.getItem('username').toString(),
-                password: sessionStorage.getItem('password').toString(),
-                restaurantID: selectedRestaurant
-            })
-            if (response.data.isDeleted) {
-                setStatusMessage('Restaurant deleted successfully.')
-                fetchRestaurants() // Refresh the list
-                setSelectedRestaurant('') // Hide buttons
-            } else {
-                setStatusMessage('Failed to delete restaurant.')
-            }
-        } catch (error) {
-            setStatusMessage('An error occurred. Please try again later.')
         }
     }
 
@@ -61,29 +50,81 @@ export default function AdminPage() {
     const handleViewReservations = async () => {
         try {
             if (selectedRestaurant) {
-                const response = await instance.post('/viewReservations', {
+                const response = await instance.post('/listReservationsAdmin', {
                     username: sessionStorage.getItem('username').toString(),
                     password: sessionStorage.getItem('password').toString(),
-                    restaurant: selectedRestaurant
+                    restaurantID: selectedRestaurant
                 })
-                if (response.data.success) {
-                    setStatusMessage('Reservations viewed successfully.')
-                    // Logic to handle displaying reservations can be added here
+                if (response.status == 200) {
+                    setReservations(response.data.reservations)
+                    setViewReservationsClicked(true) // Hide button after clicking
+                    if (response.data.reservations.length == 0) {
+                        setStatusMessage('No reservations found for this restaurant.')
+                    } else {
+                        setStatusMessage('Reservations retrieved successfully.')
+                    }
                 } else {
-                    setStatusMessage('Failed to view reservations.')
+                    setStatusMessage('Failed to retrieve reservations.')
                 }
             }
         } catch (error) {
-            setStatusMessage('An error occurred. Please try again later.')
+            setStatusMessage('An error occurred while retrieving reservations.')
+            console.error('Error:', error)
+        }
+    }
+
+    // Handle Cancel Reservation
+    const handleCancelReservation = async () => {
+        try {
+            if (selectedReservation) {
+                const response = await instance.post('/cancelReservationsAdmin', {
+                    username: sessionStorage.getItem('username').toString(),
+                    password: sessionStorage.getItem('password').toString(),
+                    confirmation: selectedReservation
+                })
+                if (response.status == 200 && response.data.success) {
+                    setStatusMessage('Reservation canceled successfully.')
+                    // Refresh reservations
+                    handleViewReservations()
+                } else {
+                    setStatusMessage('Failed to cancel reservation.')
+                }
+            }
+        } catch (error) {
+            setStatusMessage('An error occurred while canceling the reservation.')
+            console.error('Error:', error)
         }
     }
 
     // Handle Refresh Restaurants
-    const handleRefreshRestaurants = async () => {
-        setSelectedRestaurant('') // Hide buttons
-        setStatusMessage('') // Clear status message
-        fetchRestaurants() // Fetch restaurants again
+    const handleRefreshRestaurants = () => {
+        setSelectedRestaurant('')
+        setReservations([])
+        setSelectedReservation('')
+        setViewReservationsClicked(false)
+        setStatusMessage('')
+        fetchRestaurants()
     }
+
+    // Handle Delete Restaurant
+  const handleDeleteRestaurant = async () => {
+    try {
+      const response = await instance.post('/deleteRestaurantAdmin', {
+        username: sessionStorage.getItem('username').toString(),
+        password: sessionStorage.getItem('password').toString(),
+        restaurantID: selectedRestaurant
+      });
+      if (response.data.isDeleted) {
+        setStatusMessage('Restaurant deleted successfully.');
+        fetchRestaurants(); // Refresh the list
+        setSelectedRestaurant(''); // Hide buttons
+      } else {
+        setStatusMessage('Failed to delete restaurant.');
+      }
+    } catch (error) {
+      setStatusMessage('An error occurred. Please try again later.');
+    }
+  }
 
     // Use effect to handle authorization and fetching data
     useEffect(() => {
@@ -92,13 +133,13 @@ export default function AdminPage() {
         const password = sessionStorage.getItem('password')
 
         if (!username || !password) {
-            // If no credentials, redirect to Authorization page
-            router.push('/Authorization')
+            // If no credentials, redirect to log in page
+            router.push('/Log_in')
         } else {
             // Fetch list of restaurants
             fetchRestaurants()
         }
-    }, [router, fetchRestaurants])
+    }, [router])
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100">
@@ -114,7 +155,7 @@ export default function AdminPage() {
                         onChange={handleRestaurantChange}
                         className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                         <option value="" disabled>Select a restaurant...</option>
-                        {restaurants.length > 0 && restaurants.map((restaurant) => (
+                        {restaurants.map((restaurant) => (
                             <option key={restaurant.idRestaurant} value={restaurant.idRestaurant}>
                                 {restaurant.name} - Status: {restaurant.activeStatus === 'ACTIVE' ? 'Active' : 'Inactive'}
                             </option>
@@ -137,22 +178,46 @@ export default function AdminPage() {
                         >
                             Delete Restaurant
                         </button>
-                        <button
-                            onClick={handleViewReservations}
-                            className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
-                        >
-                            View Reservations
-                        </button>
+                        {!viewReservationsClicked && (
+                            <button
+                                onClick={handleViewReservations}
+                                className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
+                            >
+                                View Reservations
+                            </button>
+                        )}
+                        {reservations.length > 0 && (
+                            <>
+                                <label htmlFor="reservations" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Select a Reservation
+                                </label>
+                                <select
+                                    id="reservations"
+                                    value={selectedReservation}
+                                    onChange={handleReservationChange}
+                                    className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="" disabled>Select a reservation...</option>
+                                    {reservations.map((reservation) => (
+                                        <option key={reservation.confirmationCode} value={reservation.confirmationCode}>
+                                            {`Code: ${reservation.confirmationCode}, Date: ${reservation.date}, Time: ${reservation.startTime}`}
+                                        </option>
+                                    ))}
+                                </select>
+                                <button
+                                    onClick={handleCancelReservation}
+                                    className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition duration-200"
+                                >
+                                    Cancel Reservation
+                                </button>
+                            </>
+                        )}
                     </div>
                 )}
-
-                {/* Display Status Message */}
                 {statusMessage && (
                     <div className="mt-4 text-center">
                         <p className="text-red-500 text-sm">{statusMessage}</p>
                     </div>
                 )}
-
                 <div className="mt-4 text-center">
                     <button
                         onClick={() => router.push('/Log_in')}
