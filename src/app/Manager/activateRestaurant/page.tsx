@@ -82,7 +82,14 @@ export default function ToggleActiveStatus() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100">
+    <main
+      className={`flex min-h-screen flex-col items-center justify-center p-6 ${activeStatus === null
+        ? 'bg-gray-100'
+        : activeStatus
+          ? 'bg-gradient-to-bl from-white via-white to-green-300'
+          : 'bg-gradient-to-br from-white via-white to-red-300'
+        }`}
+    >
       <h1 className="text-3xl font-bold text-gray-800 mb-6">
         Restaurant Status
       </h1>
