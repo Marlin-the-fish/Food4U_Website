@@ -18,6 +18,7 @@ export default function ConfirmReservation() {
   });
   const [statusMessage, setStatusMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isReservationConfirmed, setIsReservationConfirmed] = useState(false);
   const router = useRouter();
 
   // Retrieve session storage data on component mount
@@ -68,6 +69,7 @@ export default function ConfirmReservation() {
       if (response.status === 200) {
         const parsedBody = response.data;
         setStatusMessage('Reservation successfully created!');
+        setIsReservationConfirmed(true); // Set reservation confirmed state
         console.log('Confirmation Code:', parsedBody.confirmationCode);
 
         // Redirect to the success page
@@ -103,10 +105,7 @@ export default function ConfirmReservation() {
       <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-8">
         <h1 className="text-2xl font-bold mb-6 text-center text-black">Confirm Reservation</h1>
         <div className="text-lg space-y-4">
-          <p className="flex justify-between items-center">
-            <span className="font-medium text-gray-700">Table ID:</span>
-            <span className="text-gray-900">{reservationData.idTable || 'Not set'}</span>
-          </p>
+          
           <p className="flex justify-between items-center">
             <span className="font-medium text-gray-700">Start Time:</span>
             <span className="text-gray-900">{reservationData.startTime || 'Not set'}</span>
@@ -115,10 +114,7 @@ export default function ConfirmReservation() {
             <span className="font-medium text-gray-700">Date:</span>
             <span className="text-gray-900">{reservationData.date || 'Not set'}</span>
           </p>
-          <p className="flex justify-between items-center">
-            <span className="font-medium text-gray-700">Restaurant ID:</span>
-            <span className="text-gray-900">{reservationData.idRestaurant || 'Not set'}</span>
-          </p>
+          
           <p className="flex justify-between items-center">
             <span className="font-medium text-gray-700">Number of Seats:</span>
             <span className="text-gray-900">{reservationData.numberOfSeats || 'Not set'}</span>
@@ -131,20 +127,18 @@ export default function ConfirmReservation() {
             <span className="font-medium text-gray-700">User Email:</span>
             <span className="text-gray-900">{reservationData.email || 'Not set'}</span>
           </p>
-          <p className="flex justify-between items-center">
-            <span className="font-medium text-gray-700">User ID:</span>
-            <span className="text-gray-900">{reservationData.idUser || 'Not set'}</span>
-          </p>
         </div>
-        <button
-          onClick={handleConfirmReservation}
-          className={`mt-6 py-2 px-4 rounded-md w-full transition duration-200 ${
-            isSubmitting ? 'bg-gray-400 text-gray-700 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'
-          }`}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Processing...' : 'Information Confirmed'}
-        </button>
+        {!isReservationConfirmed && (
+          <button
+            onClick={handleConfirmReservation}
+            className={`mt-6 py-2 px-4 rounded-md w-full transition duration-200 ${
+              isSubmitting ? 'bg-gray-400 text-gray-700 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'
+            }`}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Processing...' : 'Information Confirmed'}
+          </button>
+        )}
         <button
           onClick={handleReturnHome}
           className="mt-4 py-2 px-4 rounded-md w-full bg-gray-500 text-white hover:bg-gray-600 transition duration-200"
@@ -153,9 +147,9 @@ export default function ConfirmReservation() {
         </button>
         {statusMessage && (
           <div className="mt-4 text-center">
-            <p className={`text-sm ${statusMessage.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>
-              {statusMessage}
-            </p>
+            <p className={`text-sm ${statusMessage.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>{
+              statusMessage
+            }</p>
           </div>
         )}
       </div>
