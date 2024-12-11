@@ -13,28 +13,26 @@ export default function CheckTableAvailability() {
   const [availableTable, setAvailableTable] = useState(null);
   const [openHour, setOpenHour] = useState(null);
   const [closeHour, setCloseHour] = useState(null);
-  const [idRestaurant, setidRestaurant] = useState(sessionStorage.getItem('idRestaurant'));
-  const [numberOfSeats, setnumberOfSeats] = useState(sessionStorage.getItem('numberOfSeats'));
-  const [date, setdate] = useState(sessionStorage.getItem('date'));
+  const [idRestaurant, setidRestaurant] = useState('');
+  const [numberOfSeats, setnumberOfSeats] = useState('');
+  const [date, setdate] = useState('');
   const router = useRouter(); // Initialize router
 
   // Log sessionStorage data to the console
   useEffect(() => {
+    setidRestaurant(sessionStorage.getItem('idRestaurant').toString());
+    setnumberOfSeats(sessionStorage.getItem('numberOfSeats').toString());
+    setdate(sessionStorage.getItem('date').toString());
     console.log('SessionStorage Data:', {
-      idRestaurant,
-      numberOfSeats,
-      date,
-    })
+      idRestaurant:sessionStorage.getItem('idRestaurant'),
+      numberOfSeats:sessionStorage.getItem('numberOfSeats'),
+      date:sessionStorage.getItem('date'),
+    });
 
     // Fetch restaurant hours on component mount
     const fetchRestaurantHours = async () => {
-      if (!idRestaurant) {
-        setStatusMessage('Missing restaurant ID. Please start the process again.');
-        return;
-      }
-
       try {
-        const response = await instance.post('/fetchOpenCloseHour', { idRestaurant });
+        const response = await instance.post('/fetchOpenCloseHour', { idRestaurant: idRestaurant });
 
         if (response.status === 200 && response.data.body) {
           const parsedBody = JSON.parse(response.data.body);

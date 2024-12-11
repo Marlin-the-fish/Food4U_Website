@@ -31,7 +31,7 @@ const Calendar: React.FC = () => {
 
   useEffect(() => {
     const idRestaurant = sessionStorage.getItem("idRestaurant");
-
+    sessionStorage.setItem('idRestaurant', idRestaurant);
     if (!idRestaurant) {
       alert("Restaurant ID not found. Please log in again.");
       return;
@@ -39,7 +39,7 @@ const Calendar: React.FC = () => {
 
     const fetchClosedDates = async () => {
       try {
-        const response = await axios.post(LAMBDA_URL, { idRestaurant });
+        const response = await axios.post(LAMBDA_URL, { idRestaurant: idRestaurant });
         const parsedResponse = JSON.parse(response.data.body); // Parse the response body
         setClosedDates(parsedResponse.closedDates?.map((date: string) => date.split("T")[0]) || null); // Handle missing closedDates
       } catch (error) {
