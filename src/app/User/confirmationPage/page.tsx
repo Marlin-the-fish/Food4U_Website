@@ -1,13 +1,19 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useRouter } from 'next/navigation'
 
 const LAMBDA_URL = "https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/checkReservation"; // Replace with your actual Lambda function URL
+const instance = axios.create({
+  baseURL:'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial'
+})
 
 const ReservationLookup: React.FC = () => {
   const [responseMessage, setResponseMessage] = useState("");
   const [reservationDetails, setReservationDetails] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [confirmationStep, setConfirmationStep] = useState(false);
+  const router = useRouter()
 
   useEffect(() => {
     const email = sessionStorage.getItem("email");
@@ -41,6 +47,32 @@ const ReservationLookup: React.FC = () => {
 
     fetchReservation();
   }, []);
+
+  const handleCancelReservation = async () => {
+    if (!confirmationStep) {
+      setConfirmationStep(true);
+      setResponseMessage('Please click cancel again to confirm.');
+      return;
+    }
+
+    try {
+      const response = await instance.post('/cancelReservationUser', {
+        confirmation: sessionStorage.getItem('confirmationCode').toString(),
+        userEmail: sessionStorage.getItem("email").toString()
+      });
+
+      if (response.data.isDeleted) {
+        setResponseMessage('Reservation deleted successfully.');
+        router.push("/");
+      } else {
+        setResponseMessage('Failed to delete reservation.');
+      }
+    } catch (error) {
+      setResponseMessage('An error occurred. Please try again later.');
+    } finally {
+      setConfirmationStep(false); // Reset confirmation step after action
+    }
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
@@ -81,6 +113,14 @@ const ReservationLookup: React.FC = () => {
                 <span className="text-gray-900">{reservationDetails.seatsTaken}</span>
               </li>
             </ul>
+            <div className="text-center mt-6">
+              <button
+                onClick={handleCancelReservation}
+                className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition duration-200"
+              >
+                {confirmationStep ? 'Confirm Cancel Reservation' : 'Cancel Reservation'}
+              </button>
+            </div>
           </div>
         )}
         <div className="text-center mt-6">
