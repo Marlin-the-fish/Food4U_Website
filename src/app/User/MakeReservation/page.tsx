@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation'; // Import useRouter for navigation
 
@@ -9,6 +9,12 @@ const LAMBDA_URL = 'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initi
 export default function UserLogin() {
   const [formData, setFormData] = useState({ name: '', email: '' });
   const router = useRouter(); // Initialize the router
+
+  // Clear session storage when the page loads
+  useEffect(() => {
+    sessionStorage.clear();
+    console.log('Session storage cleared');
+  }, []); // Empty dependency array ensures this runs only once on component mount
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -28,7 +34,6 @@ export default function UserLogin() {
     // Save name and email to session storage
     sessionStorage.setItem('name', name);
     sessionStorage.setItem('email', email);
-    
 
     // Log saved data to the console
     console.log('Saved to session storage:');

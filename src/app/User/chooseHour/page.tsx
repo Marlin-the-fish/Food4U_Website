@@ -11,6 +11,8 @@ export default function CheckTableAvailability() {
   const [startTime, setStartTime] = useState(''); // User-input start time
   const [statusMessage, setStatusMessage] = useState('');
   const [availableTable, setAvailableTable] = useState(null);
+  const [openHour, setOpenHour] = useState(null);
+  const [closeHour, setCloseHour] = useState(null);
   const router = useRouter(); // Initialize router
 
   // Retrieve necessary data from sessionStorage
@@ -25,7 +27,33 @@ export default function CheckTableAvailability() {
       numberOfSeats,
       date,
     });
-  }, []); // Runs only once when the component mounts
+
+    // Fetch restaurant hours on component mount
+    const fetchRestaurantHours = async () => {
+      if (!idRestaurant) {
+        setStatusMessage('Missing restaurant ID. Please start the process again.');
+        return;
+      }
+
+      try {
+        const response = await instance.post('/fetchOpenCloseHour', { idRestaurant });
+
+        if (response.status === 200 && response.data.body) {
+          const parsedBody = JSON.parse(response.data.body);
+          setOpenHour(parsedBody.openHour);
+          setCloseHour(parsedBody.closeHour);
+          console.log('Fetched restaurant hours:', parsedBody);
+        } else {
+          setStatusMessage('Failed to fetch restaurant hours.');
+        }
+      } catch (error) {
+        console.error('Error fetching restaurant hours:', error);
+        setStatusMessage('An error occurred while fetching restaurant hours.');
+      }
+    };
+
+    fetchRestaurantHours();
+  }, [idRestaurant]); // Runs only once when the component mounts
 
   const handleCheckAvailability = async () => {
     if (!startTime) {
@@ -38,13 +66,22 @@ export default function CheckTableAvailability() {
       return;
     }
 
+    // Validate start time within openHour and closeHour
+    const startTimeInt = parseInt(startTime, 10);
+    if (openHour !== null && closeHour !== null) {
+      if (startTimeInt < openHour || startTimeInt >= closeHour) {
+        setStatusMessage('Restaurant is not available at this time.');
+        return;
+      }
+    }
+
     try {
       // Send a POST request to check table availability
       const response = await instance.post('/getUnavailableHour', {
         idRestaurant,
         numberOfSeats: parseInt(numberOfSeats, 10),
         date,
-        startTime: parseInt(startTime, 10),
+        startTime: startTimeInt,
       });
 
       if (response.status === 200) {
