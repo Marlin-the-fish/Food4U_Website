@@ -10,6 +10,21 @@ export const handler = async (event) => {
     database: "Food4U"
   })
 
+  // Find userID from email
+  let GetUser = (userEmail) => {
+    return new Promise((resolve, reject) => {
+        pool.query(
+            "SELECT * FROM user WHERE email=?", [userEmail],
+            (error, rows) => {
+                if (error) {
+                    return reject(error);
+                }
+                return resolve(rows);
+            }
+        )
+    })
+  }
+
   // Check if reservation exists and matches userID
   let CheckReservation = (confirmation, userID) => {
     return new Promise((resolve, reject) => {
@@ -53,7 +68,16 @@ export const handler = async (event) => {
   let response;
 
   try {
-    const reservationExists = await CheckReservation(event.confirmation, event.userID);
+    const user = await GetUser(event.userEmail);
+    if (user.length == 0) {
+        response = {
+            statusCode: 400,
+            user: user,
+            error: "User not found."
+        };
+    }
+    const userID = user[0].idUser
+    const reservationExists = await CheckReservation(event.confirmation, userID);
     if (reservationExists) {
         const isDeleted = await DeleteReservation(event.confirmation);
         if (isDeleted) {
