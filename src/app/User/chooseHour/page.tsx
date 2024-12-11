@@ -13,12 +13,10 @@ export default function CheckTableAvailability() {
   const [availableTable, setAvailableTable] = useState(null);
   const [openHour, setOpenHour] = useState(null);
   const [closeHour, setCloseHour] = useState(null);
+  const [idRestaurant, setidRestaurant] = useState(sessionStorage.getItem('idRestaurant'));
+  const [numberOfSeats, setnumberOfSeats] = useState(sessionStorage.getItem('numberOfSeats'));
+  const [date, setdate] = useState(sessionStorage.getItem('date'));
   const router = useRouter(); // Initialize router
-
-  // Retrieve necessary data from sessionStorage
-  const idRestaurant = sessionStorage.getItem('idRestaurant');
-  const numberOfSeats = sessionStorage.getItem('numberOfSeats');
-  const date = sessionStorage.getItem('date');
 
   // Log sessionStorage data to the console
   useEffect(() => {
@@ -26,7 +24,7 @@ export default function CheckTableAvailability() {
       idRestaurant,
       numberOfSeats,
       date,
-    });
+    })
 
     // Fetch restaurant hours on component mount
     const fetchRestaurantHours = async () => {
