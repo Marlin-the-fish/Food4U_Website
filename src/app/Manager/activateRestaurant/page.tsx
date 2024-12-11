@@ -1,9 +1,10 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 export default function ToggleActiveStatus() {
   const [message, setMessage] = useState('');
+  const [activeStatus, setActiveStatus] = useState(null); // Track restaurant active/inactive status
 
   // Function to get username and password from session storage
   const getCredentials = () => {
@@ -12,13 +13,41 @@ export default function ToggleActiveStatus() {
     return { username, password };
   };
 
+  // Fetch current active status on component load
+  useEffect(() => {
+    const fetchActiveStatus = async () => {
+      const { username, password } = getCredentials();
+      if (!username || !password) {
+        setMessage('User is not authenticated. Please log in.');
+        return;
+      }
+
+      try {
+        const response = await axios.post(
+          'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/getRestaurantStatus',
+          { username, password },
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+
+        if (response.status === 200) {
+          const { activeStatus } = JSON.parse(response.data.body); // Parse the response body
+          setActiveStatus(activeStatus === 'ACTIVE'); // Convert string to boolean for frontend logic
+        } else {
+          setMessage('Failed to fetch restaurant status.');
+        }
+      } catch (error) {
+        console.error('Error fetching status:', error.response?.data || error.message);
+        setMessage('An error occurred while fetching the restaurant status.');
+      }
+    };
+
+    fetchActiveStatus();
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Get username and password from session storage
     const { username, password } = getCredentials();
-
-    // Validate credentials
     if (!username || !password) {
       setMessage('User is not authenticated. Please log in.');
       console.log('Missing username or password in session storage.');
@@ -29,7 +58,6 @@ export default function ToggleActiveStatus() {
       const payload = { username, password };
       console.log('Sending request with payload:', payload);
 
-      // Call the Lambda function
       const response = await axios.post(
         'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/activateRestaurant',
         payload,
@@ -42,11 +70,10 @@ export default function ToggleActiveStatus() {
       console.log('Parsed Response Data:', responseData);
 
       if (response.status === 200) {
-        const { message: successMessage } = responseData;
-        setMessage(successMessage);
+        setMessage(response.data.message);
+        setActiveStatus(!activeStatus); // Toggle the status after successful update
       } else {
-        setMessage(responseData.message || 'Failed to toggle activeStatus.');
-        console.log('Unexpected response:', responseData);
+        setMessage(response.data.message || 'Failed to toggle activeStatus.');
       }
     } catch (error) {
       console.error('Error occurred:', error.response?.data || error.message);
@@ -57,22 +84,29 @@ export default function ToggleActiveStatus() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">
-        Toggle Restaurant Active Status
+        Restaurant Status
       </h1>
 
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-md bg-white shadow-md rounded px-8 pt-6 pb-8"
       >
-        <p className="text-gray-700 text-center mb-4">
-          This action toggles the active status of the restaurant associated with your account.
-        </p>
+        {activeStatus !== null ? (
+          <p className="text-gray-700 text-center mb-4">
+            Your restaurant is currently{' '}
+            <span className={activeStatus ? 'text-green-500' : 'text-red-500'}>
+              {activeStatus ? 'ACTIVE' : 'INACTIVE'}
+            </span>.
+          </p>
+        ) : (
+          <p className="text-gray-700 text-center mb-4">Loading status...</p>
+        )}
 
         <button
           type="submit"
           className="w-full bg-purple-500 text-white font-bold py-2 px-4 rounded hover:bg-purple-600 focus:outline-none focus:shadow-outline"
         >
-          Toggle Active Status
+          {activeStatus ? 'Deactivate' : 'Activate'}
         </button>
       </form>
 

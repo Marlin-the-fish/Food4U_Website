@@ -15,17 +15,17 @@ export default function RestaurantHub() {
   }, []);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-purple-100">
+    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gradient-to-b from-white to-purple-200">
       {/* Page Title */}
-      <h1 className="text-4xl font-bold text-purple-800 mb-4">Restaurant Owner Hub</h1>
-      <p className="text-lg text-purple-600 mb-12">You can manage your restaurant here</p>
+      <h1 className="text-4xl font-bold text-black mb-4">Restaurant Owner Hub</h1>
+      <p className="text-lg text-black mb-12">You can manage your restaurant here</p>
 
       {/* Display Logged-In User Info */}
-      <div className="mb-8 p-4 bg-white shadow-md rounded-lg text-center">
-        <p className="text-purple-700 text-lg">
+      <div className="mb-8 p-4 bg-gray-100 shadow-md rounded-lg text-center">
+        <p className="text-black text-lg">
           <strong>Username:</strong> {username}
         </p>
-        <p className="text-purple-700 text-lg">
+        <p className="text-black text-lg">
           <strong>Password:</strong> {password}
         </p>
       </div>
@@ -33,22 +33,22 @@ export default function RestaurantHub() {
       {/* Action Buttons */}
       <div className="grid grid-cols-2 gap-6">
         <Link href="/Manager/editResTaurant">
-          <button className="w-56 bg-purple-500 text-white py-3 rounded-md text-lg hover:bg-purple-600 transition duration-200">
+          <button className="w-56 bg-yellow-500 text-white py-3 rounded-md text-lg hover:bg-yellow-600 transition duration-200">
             Edit Restaurant
           </button>
         </Link>
         <Link href="/Manager/activateRestaurant">
-          <button className="w-56 bg-purple-500 text-white py-3 rounded-md text-lg hover:bg-purple-600 transition duration-200">
+          <button className="w-56 bg-green-500 text-white py-3 rounded-md text-lg hover:bg-green-600 transition duration-200">
             Activate Restaurant
           </button>
         </Link>
-        <Link href="/Manager/createRestaurant">
-          <button className="w-56 bg-purple-500 text-white py-3 rounded-md text-lg hover:bg-purple-600 transition duration-200">
-            Create Restaurant
+        <Link href="/Manager/generateAvailabilityReport">
+          <button className="w-56 bg-blue-400 text-white py-3 rounded-md text-lg hover:bg-blue-500 transition duration-200">
+            Review Availability
           </button>
         </Link>
         <Link href="/Manager/deleteRestaurant">
-          <button className="w-56 bg-purple-500 text-white py-3 rounded-md text-lg hover:bg-purple-600 transition duration-200">
+          <button className="w-56 bg-red-500 text-white py-3 rounded-md text-lg hover:bg-red-600 transition duration-200">
             Delete Restaurant
           </button>
         </Link>
