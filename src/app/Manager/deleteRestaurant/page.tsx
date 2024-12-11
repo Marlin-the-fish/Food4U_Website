@@ -48,7 +48,7 @@ export default function DeleteRestaurant() {
             <p className="text-gray-600 text-center mb-8">
                 You can delete your restaurant here. Deleting your restaurant also deletes your manager account.
             </p>
-            <div className="flex flex-col items-center bg-white p-6 rounded shadow-md max-w-md w-full">
+            <div className="flex flex-col items-center p-6 rounded max-w-md w-full">
                 <button
                     onClick={handleDelete}
                     className="bg-purple-500 text-white font-bold text-lg py-2 px-6 rounded-lg mb-4 hover:bg-purple-600 focus:outline-none"

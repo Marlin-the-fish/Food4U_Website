@@ -402,7 +402,7 @@ export default function UpdateRestaurant() {
 
           <button
             type="submit"
-            className="bg-purple-500 text-white font-bold py-2 px-4 rounded hover:bg-purple-600 focus:outline-none focus:shadow-outline"
+            className="bg-yellow-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:shadow-outline"
           >
             Update Restaurant
           </button>
