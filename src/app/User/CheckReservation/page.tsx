@@ -1,9 +1,11 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation'; // Import the useRouter hook
 
 export default function CheckReservation() {
   const [formData, setFormData] = useState({ email: '', confirmationCode: '' });
   const [error, setError] = useState('');
+  const router = useRouter(); // Initialize the router
 
   // Clear session storage when the page loads
   useEffect(() => {
@@ -34,7 +36,7 @@ export default function CheckReservation() {
     setError('');
     saveToSessionStorage();
     console.log('Checking reservation with details:', formData);
-    // Add logic to validate the email and confirmation code
+    router.push('/User/confirmationPage'); // Navigate to the confirmation page
   };
 
   return (
@@ -54,7 +56,7 @@ export default function CheckReservation() {
               value={formData.email}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black"
               placeholder="Enter your email"
             />
           </div>
@@ -71,7 +73,7 @@ export default function CheckReservation() {
               value={formData.confirmationCode}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black"
               placeholder="Enter your confirmation code"
             />
           </div>

@@ -16,17 +16,17 @@ export default function Home() {
       </div>
 
       {/* App Name */}
-      <h1 className="text-5xl font-bold text-gray-800 mb-12">Food4U</h1>
+      <h1 className="text-7xl font-bold text-gray-800 mb-12">Food4U</h1>
 
       {/* Buttons for Reservation Actions */}
-      <div className="space-y-6">
+      <div className="flex space-x-20">
         <Link href="/User/MakeReservation">
-          <button className="w-64 bg-green-500 text-white py-3 rounded-md text-lg hover:bg-green-600 transition duration-200">
+          <button className="w-64 bg-purple-500 text-white py-3 rounded-md text-lg hover:bg-purple-600 transition duration-200">
             Make Reservation
           </button>
         </Link>
         <Link href="/User/CheckReservation">
-          <button className="w-64 bg-yellow-500 text-white py-3 rounded-md text-lg hover:bg-yellow-600 transition duration-200">
+          <button className="w-64 bg-purple-500 text-white py-3 rounded-md text-lg hover:bg-purple-600 transition duration-200">
             Check Reservation
           </button>
         </Link>
