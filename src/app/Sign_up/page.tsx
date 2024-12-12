@@ -128,7 +128,7 @@ export default function SignUp() {
         <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100">
             <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-8">
                 <button
-                    onClick={() => router.back()}
+                    onClick={() => router.push('/')}
                     className="text-blue-500 mb-4 hover:underline focus:outline-none"
                 >
                     ← Back

@@ -108,6 +108,14 @@ export default function UserLogin() {
           >
             Confirm
           </button>
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => window.history.back()}
+              className="text-blue-500 hover:underline focus:outline-none"
+            >
+              Back
+            </button>
+          </div>
         </form>
       </div>
     </main>

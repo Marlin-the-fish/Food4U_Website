@@ -1,9 +1,14 @@
 'use client'
-import React from 'react'
+import React, { useEffect } from 'react'
 import Link from 'next/link'
 
 // Top-level GUI object. Note that it manages the state that it renders
 export default function Home() {
+  useEffect(() => {
+    // Clear sessionStorage
+    sessionStorage.clear();
+    console.log('Cleared sessionStorage');
+  })
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-100 relative">
       {/* Top-right Login Button */}
