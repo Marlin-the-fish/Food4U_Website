@@ -125,7 +125,6 @@ const Calendar: React.FC = () => {
         <div className="dates">{generateCalendar()}</div>
       </div>
       <div className="actions">
-        <button onClick={() => router.back()}>Back</button>
         <button onClick={confirmDate}>Confirm</button>
       </div>
     </div>
