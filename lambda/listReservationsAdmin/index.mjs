@@ -35,7 +35,7 @@ export const handler = async (event) => {
     const isAdmin = await CheckAdmin(event.username, event.password);
     if (isAdmin > 0) {
         const all_reservations = await ListReservationsByRest(event.restaurantID);
-        if (all_reservations.length > 0) {
+        if (all_reservations.length >= 0) {
             response = {
                 statusCode: 200,
                 restaurant: event.restaurantID,

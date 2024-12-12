@@ -98,6 +98,7 @@ export default function ConfirmReservation() {
 
   const handleReturnHome = () => {
     router.push('/');
+    // router.push('/index.html')
   };
 
   return (
