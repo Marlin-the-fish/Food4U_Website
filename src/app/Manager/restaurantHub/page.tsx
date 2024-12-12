@@ -1,10 +1,13 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import axios from 'axios';
 
 export default function RestaurantHub() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [activeStatus, setActiveStatus] = useState(null); // Track restaurant active/inactive status
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     // Retrieve username and password from sessionStorage
@@ -12,7 +15,36 @@ export default function RestaurantHub() {
     const storedPassword = sessionStorage.getItem('password');
     setUsername(storedUsername || 'Not Logged In');
     setPassword(storedPassword || 'Not Available');
+
+    // Fetch restaurant status
+    const fetchActiveStatus = async () => {
+      if (!storedUsername || !storedPassword) return;
+
+      try {
+        const response = await axios.post(
+          'https://42y3io3qm4.execute-api.us-east-1.amazonaws.com/Initial/getRestaurantStatus',
+          { username: storedUsername, password: storedPassword },
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+
+        if (response.status === 200) {
+          const { activeStatus } = JSON.parse(response.data.body);
+          setActiveStatus(activeStatus === 'ACTIVE'); // Convert string to boolean
+        }
+      } catch (error) {
+        console.error('Error fetching status:', error.response?.data || error.message);
+      }
+    };
+
+    fetchActiveStatus();
   }, []);
+
+  const handleEditClick = (e) => {
+    if (activeStatus) {
+      e.preventDefault(); // Prevent navigation
+      setMessage('You must deactivate the restaurant before editing.');
+    }
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gradient-to-b from-white to-purple-200">
@@ -33,7 +65,13 @@ export default function RestaurantHub() {
       {/* Action Buttons */}
       <div className="grid grid-cols-2 gap-6">
         <Link href="/Manager/editResTaurant">
-          <button className="w-56 bg-yellow-500 text-white py-3 rounded-md text-lg hover:bg-yellow-600 transition duration-200">
+          <button
+            className={`w-56 py-3 rounded-md text-lg transition duration-200 ${activeStatus
+              ? 'bg-gray-400 text-white cursor-not-allowed'
+              : 'bg-yellow-500 text-white hover:bg-yellow-600'
+              }`}
+            onClick={handleEditClick}
+          >
             Edit Restaurant
           </button>
         </Link>
@@ -53,6 +91,11 @@ export default function RestaurantHub() {
           </button>
         </Link>
       </div>
+
+      {/* Display Restriction Message */}
+      {message && (
+        <p className="mt-4 text-center text-red-600 font-medium">{message}</p>
+      )}
     </main>
   );
 }
