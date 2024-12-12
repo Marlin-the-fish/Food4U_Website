@@ -13,7 +13,7 @@ const ReservationLookup: React.FC = () => {
   const [reservationDetails, setReservationDetails] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [confirmationStep, setConfirmationStep] = useState(false);
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
     const email = sessionStorage.getItem("email");
@@ -28,7 +28,7 @@ const ReservationLookup: React.FC = () => {
       setIsLoading(true);
       try {
         const response = await axios.post(LAMBDA_URL, { email, confirmationCode });
-        const data = JSON.parse(response.data.body); // Parse the body to access reservation details
+        const data = JSON.parse(response.data.body);
 
         if (data.message === "Reservation found successfully.") {
           setReservationDetails(data.reservation);
@@ -49,6 +49,20 @@ const ReservationLookup: React.FC = () => {
   }, []);
 
   const handleCancelReservation = async () => {
+    if (!reservationDetails) {
+      setResponseMessage("Reservation details not available.");
+      return;
+    }
+
+    const reservationDate = new Date(reservationDetails.date.toLocaleDateString("en-US", { timeZone: "UTC" }));
+    const currentDate = new Date();
+    const isCancellable = reservationDate > new Date(currentDate.setDate(currentDate.getDate() + 1));
+
+    if (!isCancellable) {
+      setResponseMessage("Reservations can only be canceled at least one day in advance.");
+      return;
+    }
+
     if (!confirmationStep) {
       setConfirmationStep(true);
       setResponseMessage('Please click cancel again to confirm.');
@@ -70,9 +84,9 @@ const ReservationLookup: React.FC = () => {
     } catch (error) {
       setResponseMessage('An error occurred. Please try again later.');
     } finally {
-      setConfirmationStep(false); // Reset confirmation step after action
+      setConfirmationStep(false);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
@@ -101,7 +115,7 @@ const ReservationLookup: React.FC = () => {
               <li>
                 <strong>Date:</strong>{" "}
                 <span className="text-gray-900">
-                  {new Date(reservationDetails.date).toLocaleDateString()}
+                  {new Date(reservationDetails.date).toLocaleDateString("en-US", { timeZone: "UTC" })}
                 </span>
               </li>
               <li>
