@@ -19,6 +19,7 @@ export default function ConfirmReservation() {
   const [statusMessage, setStatusMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReservationConfirmed, setIsReservationConfirmed] = useState(false);
+  const [confirmationCode, setConfirmationCode] = useState('');
   const router = useRouter();
 
   // Retrieve session storage data on component mount
@@ -67,16 +68,15 @@ export default function ConfirmReservation() {
       });
 
       if (response.status === 200) {
-        const parsedBody = response.data;
+        const parsedBody = JSON.parse(response.data.body); // Parse the body field
+        console.log('Parsed API Response:', parsedBody); // Debugging line
         setStatusMessage('Reservation successfully created!');
         setIsReservationConfirmed(true); // Set reservation confirmed state
-        console.log('Confirmation Code:', parsedBody.confirmationCode);
-
-        // Redirect to the success page
-        //router.push('/User/success');
+        setConfirmationCode(parsedBody.confirmationCode || 'N/A'); // Store the confirmation code
       } else {
         setStatusMessage('Failed to create reservation. Please try again.');
       }
+
     } catch (error) {
       console.error('Error creating reservation:', error);
 
@@ -105,7 +105,6 @@ export default function ConfirmReservation() {
       <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-8">
         <h1 className="text-2xl font-bold mb-6 text-center text-black">Confirm Reservation</h1>
         <div className="text-lg space-y-4">
-          
           <p className="flex justify-between items-center">
             <span className="font-medium text-gray-700">Start Time:</span>
             <span className="text-gray-900">{reservationData.startTime || 'Not set'}</span>
@@ -114,7 +113,6 @@ export default function ConfirmReservation() {
             <span className="font-medium text-gray-700">Date:</span>
             <span className="text-gray-900">{reservationData.date || 'Not set'}</span>
           </p>
-          
           <p className="flex justify-between items-center">
             <span className="font-medium text-gray-700">Number of Seats:</span>
             <span className="text-gray-900">{reservationData.numberOfSeats || 'Not set'}</span>
@@ -136,8 +134,15 @@ export default function ConfirmReservation() {
             }`}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Processing...' : 'Information Confirmed'}
+            {isSubmitting ? 'Processing...' : 'Confirm Reservation'}
           </button>
+        )}
+        {isReservationConfirmed && (
+          <div className="mt-4 text-center">
+            <p className="text-lg font-medium text-green-600">Reservation Confirmed!</p>
+            <p className="text-sm text-gray-700">Your Confirmation Code:</p>
+            <p className="text-xl font-bold text-gray-900">{confirmationCode}</p>
+          </div>
         )}
         <button
           onClick={handleReturnHome}
