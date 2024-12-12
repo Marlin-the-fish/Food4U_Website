@@ -199,7 +199,7 @@ export default function AdminPage() {
                                     <option value="" disabled>Select a reservation...</option>
                                     {reservations.map((reservation) => (
                                         <option key={reservation.confirmationCode} value={reservation.confirmationCode}>
-                                            {`Code: ${reservation.confirmationCode}, Date: ${reservation.date}, Time: ${reservation.startTime}`}
+                                            {`Code: ${reservation.confirmationCode}, Date: ${new Date(reservation.date).toLocaleDateString("en-US", { timeZone: "UTC" })}, Time: ${reservation.startTime}`}
                                         </option>
                                     ))}
                                 </select>
