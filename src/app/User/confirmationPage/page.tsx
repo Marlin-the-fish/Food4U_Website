@@ -54,9 +54,17 @@ const ReservationLookup: React.FC = () => {
       return;
     }
 
-    const reservationDate = new Date(reservationDetails.date.toLocaleDateString("en-US", { timeZone: "UTC" }));
+    const reservationDate = new Date(reservationDetails.date);
     const currentDate = new Date();
-    const isCancellable = reservationDate > new Date(currentDate.setDate(currentDate.getDate() + 1));
+    // Get the date part of both reservationDate and currentDate
+    const reservationDateWithoutTime = new Date(reservationDate.toISOString().split('T')[0]);
+    const currentDateWithoutTime = new Date(currentDate.toISOString().split('T')[0]);
+
+    // Add one day to currentDateWithoutTime
+    currentDateWithoutTime.setDate(currentDateWithoutTime.getDate() + 1);
+
+    // Compare the dates without time component
+    const isCancellable = reservationDateWithoutTime > currentDateWithoutTime;
 
     if (!isCancellable) {
       setResponseMessage("Reservations can only be canceled at least one day in advance.");
