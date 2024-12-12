@@ -171,7 +171,7 @@ export default function SignUp() {
                             id="role"
                             value={role}
                             onChange={(e) => setRole(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black"
                         >
                             <option value="blank">Select Role</option>
                             <option value="manager">Manager</option>

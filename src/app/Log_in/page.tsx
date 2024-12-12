@@ -142,7 +142,7 @@ export default function Login() {
                             id="role"
                             value={role}
                             onChange={(e) => setRole(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-black"
                         >
                             <option value="manager">Manager</option>
                             <option value="admin">Admin</option>
