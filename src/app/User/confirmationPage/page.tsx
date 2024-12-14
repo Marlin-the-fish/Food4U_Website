@@ -86,6 +86,7 @@ const ReservationLookup: React.FC = () => {
       if (response.data.isDeleted) {
         setResponseMessage('Reservation deleted successfully.');
         router.push("/");
+        // router.push("/index.html");
       } else {
         setResponseMessage('Failed to delete reservation.');
       }
